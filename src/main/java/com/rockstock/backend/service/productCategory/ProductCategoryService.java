@@ -1,12 +1,16 @@
 package com.rockstock.backend.service.productCategory;
 
 import com.rockstock.backend.entity.product.ProductCategory;
+import com.rockstock.backend.infrastructure.product.repository.ProductRepository;
 import com.rockstock.backend.infrastructure.productCategory.dto.*;
 import com.rockstock.backend.infrastructure.productCategory.repository.ProductCategoryRepository;
 import com.rockstock.backend.service.cloudinary.CloudinaryService;
+import com.rockstock.backend.service.cloudinary.DeleteCloudinaryService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,14 +18,14 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ProductCategoryService {
     private final ProductCategoryRepository productCategoryRepository;
+    private final ProductRepository productRepository;
     private final CloudinaryService cloudinaryService;
+    private final DeleteCloudinaryService deleteCloudinaryService;
 
     @Transactional
     public CreateProductCategoryResponseDTO createProductCategory(CreateProductCategoryRequestDTO createProductCategoryRequestDTO, MultipartFile file) throws IOException {
@@ -69,6 +73,12 @@ public class ProductCategoryService {
 
         // Upload new picture if provided
         if (requestDTO.getFile() != null && !requestDTO.getFile().isEmpty()) {
+            // Delete old picture from Cloudinary if it exists
+            if (productCategory.getCategoryPicture() != null) {
+                deleteCloudinaryService.deleteFromCloudinary(productCategory.getCategoryPicture());
+            }
+
+            // Upload new picture
             String imageUrl = cloudinaryService.uploadFile(requestDTO.getFile());
             productCategory.setCategoryPicture(imageUrl);
         }
@@ -87,26 +97,39 @@ public class ProductCategoryService {
         ProductCategory productCategory = productCategoryRepository.findByCategoryId(categoryId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
 
+        // Check if there are any products using this category
+        boolean hasProducts = productRepository.existsByProductCategory(productCategory);
+        if (hasProducts) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot delete category: Products are still using this category.");
+        }
+
+        // Perform soft delete by setting deletedAt timestamp
         productCategory.setDeletedAt(OffsetDateTime.now());
         productCategoryRepository.save(productCategory);
     }
 
     public void restoreProductCategory(Long categoryId) {
-        ProductCategory productCategory = productCategoryRepository.findByCategoryId(categoryId)
+        ProductCategory productCategory = productCategoryRepository.findDeletedCategoryById(categoryId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found or not deleted"));
 
         productCategory.setDeletedAt(null);
-        productCategoryRepository.save( productCategory);
+        productCategoryRepository.save(productCategory);
     }
 
-    public List<HomeProductCategoryDTO> getAllCategories() {
-        return productCategoryRepository.findAllActiveCategories()
-                .stream()
+    public Page<HomeProductCategoryDTO> getAllCategories(String categoryName, Pageable pageable) {
+        if (categoryName == null || categoryName.trim().isEmpty()) {
+            return productCategoryRepository.findAllActiveCategories(null, pageable)
+                    .map(category -> new HomeProductCategoryDTO(
+                            category.getId(),
+                            category.getCategoryName(),
+                            category.getCategoryPicture()));
+        }
+
+        return productCategoryRepository.findAllActiveCategories(categoryName, pageable)
                 .map(category -> new HomeProductCategoryDTO(
                         category.getId(),
                         category.getCategoryName(),
-                        category.getCategoryPicture()))
-                .collect(Collectors.toList());
+                        category.getCategoryPicture()));
     }
 
     public GetProductCategoryResponseDTO getProductCategoryById(Long categoryId) {
@@ -114,6 +137,6 @@ public class ProductCategoryService {
                 .orElseThrow(() -> new EntityNotFoundException("Product Category with ID " + categoryId + " not found"));
 
         // Return a DTO instead of the entity
-        return new GetProductCategoryResponseDTO(productCategory.getId(), productCategory.getCategoryName());
+        return new GetProductCategoryResponseDTO(productCategory.getId(), productCategory.getCategoryPicture(), productCategory.getCategoryName());
     }
 }

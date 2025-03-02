@@ -7,9 +7,13 @@ import com.rockstock.backend.infrastructure.warehouseStock.dto.WarehouseStockRes
 import com.rockstock.backend.infrastructure.warehouseStock.repository.WarehouseStockRepository;
 import com.rockstock.backend.infrastructure.product.repository.ProductRepository;
 import com.rockstock.backend.infrastructure.warehouse.repository.WarehouseRepository;
+import com.rockstock.backend.infrastructure.warehouseStock.specification.FilterWarehouseStockSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
@@ -36,7 +40,7 @@ public class WarehouseStockService {
         // Check if WarehouseStock already exists (excluding soft-deleted records)
         Optional<WarehouseStock> existingStock = warehouseStockRepository.findByProductAndWarehouse(product, warehouse);
         if (existingStock.isPresent()) {
-            throw new IllegalStateException("WarehouseStock already exists for this product in the specified warehouse");
+            throw new IllegalStateException("WarehouseStock already exists for this product in the "+ warehouse.getName());
         }
 
         // Create new WarehouseStock with stockQuantity = 0
@@ -71,5 +75,34 @@ public class WarehouseStockService {
         if (updatedRows == 0) {
             throw new EntityNotFoundException("WarehouseStock not found or not deleted.");
         }
+    }
+
+    public Page<WarehouseStockResponseDTO> getFilteredWarehouseStocks(String productName, String warehouseName, Pageable pageable) {
+        Specification<WarehouseStock> spec = FilterWarehouseStockSpecification.withFilters(productName, warehouseName);
+
+        Page<WarehouseStock> stocks = warehouseStockRepository.findAll(spec, pageable);
+
+        if (stocks.isEmpty()) {
+            throw new EntityNotFoundException("No warehouse stock records found.");
+        }
+
+        return stocks.map(stock -> new WarehouseStockResponseDTO(
+                stock.getId(),
+                stock.getStockQuantity(),
+                stock.getProduct().getProductName(),
+                stock.getWarehouse().getName()
+        ));
+    }
+
+    public WarehouseStockResponseDTO getWarehouseStockById(Long stockId) {
+        WarehouseStock stock = warehouseStockRepository.findByIdAndDeletedAtIsNull(stockId)
+                .orElseThrow(() -> new EntityNotFoundException("WarehouseStock not found"));
+
+        return new WarehouseStockResponseDTO(
+                stock.getId(),
+                stock.getStockQuantity(),
+                stock.getProduct().getProductName(),
+                stock.getWarehouse().getName()
+        );
     }
 }

@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class GetProductCategoryResponseDTO {
     private Long categoryId;
     private String categoryName;
+    private String categoryPicture;
 }

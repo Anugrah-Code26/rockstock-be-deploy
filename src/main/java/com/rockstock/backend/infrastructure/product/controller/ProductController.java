@@ -60,7 +60,7 @@ public class ProductController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String category,
-            @RequestParam(defaultValue = "createdAt") String sortField,
+            @RequestParam(defaultValue = "updatedAt") String sortField,
             @RequestParam(defaultValue = "ASC") String sortDirection
     ) {
         return ResponseEntity.ok(getProductService.getAllProducts(page, size, name, category, sortField, sortDirection));

@@ -3,6 +3,8 @@ package com.rockstock.backend.entity.warehouse;
 //import com.rockstock.backend.entity.geolocation.City;
 //import com.rockstock.backend.entity.stock.StockJournal;
 //import com.rockstock.backend.entity.stock.WarehouseStock;
+import com.rockstock.backend.entity.stock.MutationJournal;
+import com.rockstock.backend.entity.stock.WarehouseStock;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -12,6 +14,8 @@ import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.OffsetDateTime;
+import java.util.HashSet;
+import java.util.Set;
 //import java.util.HashSet;
 //import java.util.Set;
 
@@ -81,12 +85,12 @@ public class Warehouse {
 //    @OneToMany(mappedBy = "warehouse", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 //    private Set<WarehouseAdmin> warehouseAdmins = new HashSet<>();
 //
-//    @OneToMany(mappedBy = "warehouse", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-//    private Set<WarehouseStock> warehouseStocks = new HashSet<>();
-//
+    @OneToMany(mappedBy = "warehouse", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<WarehouseStock> warehouseStocks = new HashSet<>();
+
 //    @OneToMany(mappedBy = "originWarehouse", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-//    private Set<StockJournal> originStockJournals = new HashSet<>();
+//    private Set<MutationJournal> originStockJournals = new HashSet<>();
 //
 //    @OneToMany(mappedBy = "destinationWarehouse", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-//    private Set<StockJournal> destinationStockJournals = new HashSet<>();
+//    private Set<MutationJournal> destinationStockJournals = new HashSet<>();
 }

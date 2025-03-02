@@ -67,11 +67,11 @@ public class MutationJournal {
     @JoinColumn(name = "destination_warehouse_id")
     private Warehouse destinationWarehouse;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "stock_change_type_id", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "stock_change_type", nullable = false)
     private StockChangeType stockChangeType;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "mutation_statuses_id", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "mutation_status", nullable = false)
     private MutationStatus mutationStatus;
 }

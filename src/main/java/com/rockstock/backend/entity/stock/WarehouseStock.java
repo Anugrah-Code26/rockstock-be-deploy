@@ -14,7 +14,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@EntityListeners(WarehouseStockListener.class)
+//@EntityListeners(WarehouseStockListener.class)
 @Table(name = "warehouse_stocks", schema = "rockstock")
 @Getter
 @Setter

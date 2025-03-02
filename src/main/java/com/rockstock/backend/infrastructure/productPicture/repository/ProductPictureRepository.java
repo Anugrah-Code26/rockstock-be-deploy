@@ -1,5 +1,6 @@
 package com.rockstock.backend.infrastructure.productPicture.repository;
 
+import com.rockstock.backend.entity.product.Product;
 import com.rockstock.backend.entity.product.ProductPicture;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -26,11 +27,8 @@ public interface ProductPictureRepository extends JpaRepository<ProductPicture, 
     @Query("SELECT pp FROM ProductPicture pp WHERE pp.product.id = :productId AND pp.deletedAt IS NULL ORDER BY pp.position ASC")
     List<ProductPicture> findAllByProductId(@Param("productId") Long productId);
 
-    @Modifying
-    @Query("UPDATE ProductPicture pp SET pp.deletedAt = :deletedAt WHERE pp.Id = :pictureId AND pp.product.id = :productId")
-    int softDelete(@Param("productId") Long productId, @Param("pictureId") Long pictureId, @Param("deletedAt") OffsetDateTime deletedAt);
+    @Query("SELECT pp FROM ProductPicture pp WHERE pp.product.id = :productId AND pp.deletedAt IS NOT NULL ORDER BY pp.position ASC")
+    List<ProductPicture> findByProductIdAndDeletedAtIsNotNull(Long productId);
 
-    @Modifying
-    @Query("UPDATE ProductPicture pp SET pp.deletedAt = NULL WHERE pp.Id = :pictureId AND pp.product.id = :productId AND pp.deletedAt IS NOT NULL")
-    int restoreDeletedPicture(@Param("pictureId") Long pictureId, @Param("productId") Long productId);
+    List<ProductPicture> findByProduct(Product product);
 }
