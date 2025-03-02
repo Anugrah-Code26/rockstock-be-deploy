@@ -1,33 +1,18 @@
 package com.rockstock.backend.infrastructure.user.auth.dto;
 
-public class OAuthUserInfo {
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
+public class OAuthUserInfo {
+    private String fullname; // Fix: Sesuai database
     private String email;
-    private String fullName;
     private String profilePictureUrl;
 
-    // Getters and Setters
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
+    public OAuthUserInfo(String fullname, String email, String profilePictureUrl) {
+        this.fullname = fullname; // Fix: Sesuai dengan database
         this.email = email;
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
-    public String getProfilePictureUrl() {
-        return profilePictureUrl;
-    }
-
-    public void setProfilePictureUrl(String profilePictureUrl) {
         this.profilePictureUrl = profilePictureUrl;
     }
 }

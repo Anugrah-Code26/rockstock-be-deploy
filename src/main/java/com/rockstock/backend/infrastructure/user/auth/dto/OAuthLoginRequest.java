@@ -1,41 +1,16 @@
 package com.rockstock.backend.infrastructure.user.auth.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class OAuthLoginRequest {
-    private String idToken;
-    private String accessToken;
-    private String email;
-    private String provider;
+    private String idToken;  // ID token received from Google OAuth
+    private String accessToken;  // Access token received from Google OAuth
 
-    // Getters and Setters
-    public String getIdToken() {
-        return idToken;
-    }
-
-    public void setIdToken(String idToken) {
+    public OAuthLoginRequest(String idToken, String accessToken) {
         this.idToken = idToken;
-    }
-
-    public String getAccessToken() {
-        return accessToken;
-    }
-
-    public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getProvider() {
-        return provider;
-    }
-
-    public void setProvider(String provider) {
-        this.provider = provider;
     }
 }

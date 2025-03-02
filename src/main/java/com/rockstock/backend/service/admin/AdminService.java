@@ -70,32 +70,38 @@ public class AdminService {
     }
 
 
+    @Transactional
     public AdminResponseDTO updateAdmin(Long adminId, AdminUpdateRequestDTO request) {
         User admin = userRepository.findById(adminId)
                 .orElseThrow(() -> new RuntimeException("Admin not found"));
 
-        if (request.getEmail() != null) {
+        if (request.getEmail() != null && !request.getEmail().isEmpty()) {
             admin.setEmail(request.getEmail());
         }
-        if (request.getFullname() != null) {
+        if (request.getFullname() != null && !request.getFullname().isEmpty()) {
             admin.setFullname(request.getFullname());
         }
 
-        if (request.getPassword() != null) {
+        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
             admin.setPassword(passwordEncoder.encode(request.getPassword()));
         }
 
-        if (request.getRole() != null) {
-            Role newRole = new Role();
-            newRole.setName(request.getRole());
+        if (request.getRole() != null && !request.getRole().isEmpty()) {
+            Role newRole = roleRepository.findByName(request.getRole())
+                    .orElseThrow(() -> new RuntimeException("Role not found"));
 
             admin.getRoles().clear();
             admin.getRoles().add(newRole);
         }
 
         userRepository.save(admin);
-        return new AdminResponseDTO(admin.getId(), admin.getEmail(),
-                admin.getRoles().stream().findFirst().map(Role::getName).orElse("UNKNOWN"), admin.getFullname());
+
+        return new AdminResponseDTO(
+                admin.getId(),
+                admin.getEmail(),
+                admin.getRoles().stream().findFirst().map(Role::getName).orElse("UNKNOWN"),
+                admin.getFullname()
+        );
     }
 
 

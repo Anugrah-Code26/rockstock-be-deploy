@@ -17,7 +17,7 @@ public class UserProfileResponse {
 
     @NotNull(message = "Fullname is mandatory")
     @Size(max = 100, message = "Fullname can have at most 100 characters")
-    private String fullName;
+    private String fullname;
 
     @NotNull(message = "Email is mandatory")
     @Email(message = "Email should be valid")

@@ -38,6 +38,7 @@ public class AdminController {
 
     @PutMapping("/{adminId}")
     public ResponseEntity<AdminResponseDTO> updateAdmin(@PathVariable Long adminId, @RequestBody AdminUpdateRequestDTO request) {
+        AdminResponseDTO updatedAdmin = adminService.updateAdmin(adminId, request);
         return ResponseEntity.ok(adminService.updateAdmin(adminId, request));
     }
 

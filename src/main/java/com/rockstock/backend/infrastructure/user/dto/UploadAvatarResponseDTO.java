@@ -7,6 +7,6 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class UploadAvatarResponseDTO {
-    @JsonProperty("profile_picture_url")
-    private String imageUrl;
+    @JsonProperty("photo_profile_url")
+    private String photoProfileUrl;
 }

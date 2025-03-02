@@ -6,14 +6,14 @@ import com.rockstock.backend.entity.user.User;
 import com.rockstock.backend.infrastructure.user.auth.security.Claims;
 import com.rockstock.backend.infrastructure.user.repository.UserRepository;
 import com.rockstock.backend.infrastructure.user.dto.ChangePasswordRequest;
-import com.rockstock.backend.infrastructure.user.dto.UpdateProfileRequest;
+import com.rockstock.backend.infrastructure.user.dto.UpdateProfileRequestDTO;
 import com.rockstock.backend.infrastructure.user.dto.UploadAvatarResponseDTO;
 import com.rockstock.backend.service.user.UserService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.Map;
@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserService {
         }
 
         if (file.getSize() > 2 * 1024 * 1024) {
-            throw new IllegalArgumentException("File size must be less than 1MB.");
+            throw new IllegalArgumentException("File size must be less than 2MB.");
         }
 
         Map<String, Object> uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
@@ -61,17 +61,28 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    @Override
-    public void updateUserProfile(Long userId, UpdateProfileRequest request) {
+    @Transactional
+    public User updateUserProfile(Long userId, UpdateProfileRequestDTO request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        System.out.println("Old Fullname: " + user.getFullname());
+        System.out.println("New Fullname: " + request.getFullname());
 
         user.setFullname(request.getFullname());
         user.setBirthDate(request.getBirthDate());
         user.setGender(request.getGender());
 
-        userRepository.save(user);
+        if (request.getPhotoProfileUrl() != null && !request.getPhotoProfileUrl().isEmpty()) {
+            user.setPhotoProfileUrl(request.getPhotoProfileUrl());
+        }
+
+        System.out.println("Updated Fullname: " + user.getFullname());  // Ensure this is logged after update
+
+        userRepository.saveAndFlush(user); // Ensure the save is flushed to DB
+        return user;
     }
+
 
     @Override
     public void changePassword(Long userId, ChangePasswordRequest request) {
@@ -92,21 +103,29 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UploadAvatarResponseDTO uploadAvatar(Long userId, MultipartFile file) {
-        String imageUrl;
-        try {
-            imageUrl = uploadToCloudinary(file);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to upload image to Cloudinary." + e.getMessage());
-        }
+        String imageUrl = uploadImage(file);
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        user.setPhotoProfileUrl(imageUrl);
-        userRepository.save(user);
+        updateProfilePicture(user, imageUrl);
 
         return new UploadAvatarResponseDTO(imageUrl);
     }
+
+    private String uploadImage(MultipartFile file) {
+        try {
+            return uploadToCloudinary(file);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to upload image to Cloudinary: " + e.getMessage());
+        }
+    }
+
+    private void updateProfilePicture(User user, String imageUrl) {
+        user.setPhotoProfileUrl(imageUrl);
+        userRepository.save(user);
+    }
+
 
 
     @Override
@@ -121,6 +140,7 @@ public class UserServiceImpl implements UserService {
         user.setEmail(newEmail);
         user.setIsVerified(false);
         userRepository.save(user);
+
 
         // TODO: Send verification email with expiration of 1 hour
     }

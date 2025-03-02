@@ -6,7 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface UserService {
     User getUserProfile();
-    void updateUserProfile(Long userId, UpdateProfileRequest request);
+    User updateUserProfile(Long userId, UpdateProfileRequestDTO request);
     void changePassword(Long userId, ChangePasswordRequest request);
     UploadAvatarResponseDTO uploadAvatar(Long userId, MultipartFile file);
     void updateEmail(Long userId, String newEmail);

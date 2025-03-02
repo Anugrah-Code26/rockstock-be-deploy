@@ -63,18 +63,30 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         // Public endpoints
                         .requestMatchers("/error/**").permitAll()
-                        .requestMatchers("/api/v1/user/register").permitAll()
+
+                        .requestMatchers("/api/v1/auth/register").permitAll()
                         .requestMatchers("/api/v1/auth/login").permitAll()
                         .requestMatchers("/api/v1/auth/google/login").permitAll()
-                        .requestMatchers("/api/v1/auth/verify").permitAll()
+                        .requestMatchers("/api/v1/auth/oauth/google").permitAll()
+                        .requestMatchers("/api/v1/admin/**").permitAll()
+                        .requestMatchers("/api/v1/user/**").permitAll()
+                        .requestMatchers("/api/v1/user/profile").permitAll()
+                        .requestMatchers("/api/v1/user/upload-avatar").permitAll()
+                        .requestMatchers("/api/v1/user/confirm-reset-password").permitAll()
+                        .requestMatchers("/api/v1/warehouse/**").permitAll()
+                        .requestMatchers("/api/v1/warehouse-admins/assign").permitAll()
+                        .requestMatchers("/api/v1/auth/resend-verification").permitAll()
                         .requestMatchers("/api/v1/auth/forgot-password").permitAll()
+                        .requestMatchers("/api/v1/auth/setup-password").permitAll()
                         .requestMatchers("/api/v1/auth/reset-password").permitAll()
+                        .requestMatchers("/api/v1/auth/test-email").permitAll()
                         .requestMatchers("/api/v1/auth/verify-email").permitAll()
                         .requestMatchers("/test/**").permitAll() // Allow test API access
                         .requestMatchers("/static/**").permitAll() // Allow email template
                         .requestMatchers("/static/**", "/public/**").permitAll() // Allow static resources
                         .requestMatchers("/verification-email.html").permitAll() // Allow email template
-                        .requestMatchers("/static/**").permitAll() // Allow static files
+                        .requestMatchers("/static/**").permitAll()
+                        .requestMatchers("/api/v1/addresses/**").permitAll() // Allow static files
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(oauth2 -> {

@@ -3,42 +3,27 @@ package com.rockstock.backend.infrastructure.user.controller;
 import com.rockstock.backend.common.response.ApiResponse;
 import com.rockstock.backend.entity.user.User;
 import com.rockstock.backend.infrastructure.user.auth.security.Claims;
-import com.rockstock.backend.infrastructure.user.dto.CreateUserRequestDTO;
-import com.rockstock.backend.infrastructure.user.dto.UploadAvatarResponseDTO;
-import com.rockstock.backend.service.user.CreateUserService;
+import com.rockstock.backend.infrastructure.user.dto.*;
 import com.rockstock.backend.service.user.UserService;
-import com.rockstock.backend.service.user.auth.EmailVerificationService;
-import jakarta.validation.Valid;
+import com.rockstock.backend.service.user.ResetPasswordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import jakarta.validation.Valid;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/user")
 public class UserController {
 
     @Autowired
-    private CreateUserService createUserService;
-
-    @Autowired
-    private EmailVerificationService emailVerificationService;
-
-    @Autowired
     private UserService userService;
 
-    @PostMapping("/register")
-    public ResponseEntity<?> createUser(@Valid @RequestBody CreateUserRequestDTO req) {
-        // Buat user
-        var userResponse = createUserService.createUser(req);
-
-        // Kirim email verifikasi
-        emailVerificationService.sendVerificationEmail(req.getEmail());
-
-        // Kembalikan response
-        return ApiResponse.success(HttpStatus.OK.value(), "Registration successful. Please verify your email to activate your account.", userResponse);
-    }
+    @Autowired
+    private ResetPasswordService resetPasswordService;
 
     @GetMapping("/profile")
     public ResponseEntity<?> getUserProfile() {
@@ -46,11 +31,11 @@ public class UserController {
         return ApiResponse.success(HttpStatus.OK.value(), "User profile retrieved successfully", userProfile);
     }
 
-
-    @GetMapping("/verify-email")
-    public ResponseEntity<?> verifyEmail(@RequestParam("token") String token) {
-        emailVerificationService.verifyEmail(token);
-        return ApiResponse.success(HttpStatus.OK.value(), "Email verification successful. You can now log in.", null);
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateUserProfile(@RequestBody UpdateProfileRequestDTO request) {
+        Long userId = Claims.getUserIdFromJwt();
+        User updatedUser = userService.updateUserProfile(userId, request);
+        return ResponseEntity.ok(ApiResponse.success(HttpStatus.OK.value(), "User profile updated successfully", updatedUser));
     }
 
     @PostMapping("/upload-avatar")
@@ -61,18 +46,39 @@ public class UserController {
     }
 
 
-    //    // Reset password request endpoint: send an email to reset the password
-//    @PostMapping("/reset-password")
-//    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequestDTO req) {
-//        authService.sendResetPasswordEmail(req);
-//        return ApiResponse.successfulResponse("Reset password email sent. Please check your email.");
-//    }
-//
-//    // Confirm reset password endpoint: finalize the password reset process
-//    @PostMapping("/confirm-reset-password")
-//    public ResponseEntity<?> confirmResetPassword(@Valid @RequestBody ConfirmResetPasswordDTO req) {
-//        authService.resetPassword(req);
-//        return ApiResponse.successfulResponse("Password reset successful. You can now log in with your new password.");
-//    }
-    
+    // Reset password request endpoint: send an email to reset the password
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequestDTO request) {
+        try {
+            resetPasswordService.sendResetPasswordEmail(request);
+            return ResponseEntity.ok(Map.of("message", "Reset password link sent"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/confirm-reset-password")
+    public ResponseEntity<?> confirmResetPassword(@RequestBody @Valid ConfirmResetPasswordDTO request) {
+        System.out.println("Received token: " + request.getResetToken());
+        System.out.println("New password: " + request.getNewPassword());
+        System.out.println("Confirm reset password endpoint hit!");
+        resetPasswordService.confirmResetPassword(request);
+        return ResponseEntity.ok(Map.of("message", "Password reset successfully."));
+    }
+
+
+    @PutMapping("/update-email")
+    public ResponseEntity<?> updateEmail(@RequestParam String newEmail) {
+        Long userId = Claims.getUserIdFromJwt();
+        userService.updateEmail(userId, newEmail);
+        return ApiResponse.success("Email updated successfully. Please verify your new email.");
+    }
+
+    @PostMapping("/resend-verification-email")
+    public ResponseEntity<?> resendEmailVerification() {
+        Long userId = Claims.getUserIdFromJwt();
+        userService.resendEmailVerification(userId);
+        return ApiResponse.success("Verification email resent successfully.");
+    }
 }

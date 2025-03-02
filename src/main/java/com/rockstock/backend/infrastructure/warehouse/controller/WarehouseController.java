@@ -42,12 +42,12 @@ public class WarehouseController {
         return ResponseEntity.noContent().build();
     }
 
-    // Assign & Remove Warehouse Admin
-    @PostMapping("/assign-admin")
-    public ResponseEntity<Void> assignWarehouseAdmin(@Valid @RequestBody AssignWarehouseAdminDTO request) {
-        warehouseAdminService.assignWarehouseAdmin(request);
-        return ResponseEntity.ok().build();
-    }
+//    // Assign & Remove Warehouse Admin
+//    @PostMapping("/assign-admin")
+//    public ResponseEntity<Void> assignWarehouseAdmin(@Valid @RequestBody AssignWarehouseAdminDTO request) {
+//        warehouseAdminService.assignWarehouseAdmin(request);
+//        return ResponseEntity.ok().build();
+//    }
 
     @DeleteMapping("/remove-admin/{warehouseAdminId}")
     public ResponseEntity<Void> removeWarehouseAdmin(@PathVariable Long warehouseAdminId) {

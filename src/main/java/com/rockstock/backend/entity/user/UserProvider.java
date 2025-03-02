@@ -26,7 +26,7 @@ public class UserProvider {
     private Long id;
 
     @NotNull
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String provider;
 
     @Column(name = "deleted_at")
