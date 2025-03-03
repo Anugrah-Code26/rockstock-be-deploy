@@ -74,7 +74,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/user/upload-avatar").permitAll()
                         .requestMatchers("/api/v1/user/confirm-reset-password").permitAll()
                         .requestMatchers("/api/v1/warehouse/**").permitAll()
-                        .requestMatchers("/api/v1/warehouse-admins/assign").permitAll()
+                        .requestMatchers("/api/v1/warehouse-admins/**").permitAll()
                         .requestMatchers("/api/v1/auth/resend-verification").permitAll()
                         .requestMatchers("/api/v1/auth/forgot-password").permitAll()
                         .requestMatchers("/api/v1/auth/setup-password").permitAll()

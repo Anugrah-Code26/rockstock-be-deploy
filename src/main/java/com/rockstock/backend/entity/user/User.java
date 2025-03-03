@@ -100,6 +100,11 @@ public class User {
         deletedAt = OffsetDateTime.now();
     }
 
+    @NotNull
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
+
+
     // Relationships
     @JsonBackReference
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})

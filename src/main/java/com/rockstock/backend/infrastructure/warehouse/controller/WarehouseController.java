@@ -1,6 +1,7 @@
 package com.rockstock.backend.infrastructure.warehouse.controller;
 
 import com.rockstock.backend.infrastructure.warehouse.dto.AssignWarehouseAdminDTO;
+import com.rockstock.backend.infrastructure.warehouse.dto.UpdateWarehouseRequestDTO;
 import com.rockstock.backend.infrastructure.warehouse.dto.WarehouseRequestDTO;
 import com.rockstock.backend.infrastructure.warehouse.dto.WarehouseResponseDTO;
 import com.rockstock.backend.service.warehouse.WarehouseAdminService;
@@ -32,9 +33,13 @@ public class WarehouseController {
     }
 
     @PutMapping("/{warehouseId}")
-    public ResponseEntity<WarehouseResponseDTO> updateWarehouse(@PathVariable Long warehouseId, @Valid @RequestBody WarehouseRequestDTO request) {
+    public ResponseEntity<WarehouseResponseDTO> updateWarehouse(
+            @PathVariable Long warehouseId,
+            @Valid @RequestBody WarehouseRequestDTO request) {  // ← gunakan WarehouseRequestDTO
         return ResponseEntity.ok(warehouseService.updateWarehouse(warehouseId, request));
     }
+
+
 
     @DeleteMapping("/{warehouseId}")
     public ResponseEntity<Void> deleteWarehouse(@PathVariable Long warehouseId) {

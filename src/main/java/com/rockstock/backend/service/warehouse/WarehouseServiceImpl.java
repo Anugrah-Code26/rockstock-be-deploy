@@ -51,8 +51,11 @@ public class WarehouseServiceImpl implements WarehouseService {
         warehouse.setLatitude(request.getLatitude());
 
         Warehouse updatedWarehouse = warehouseRepository.save(warehouse);
+
+        System.out.println("Updated Warehouse: " + updatedWarehouse); // Tambahkan log
         return mapToDTO(updatedWarehouse);
     }
+
 
     @Override
     public void deleteWarehouse(Long warehouseId) {
