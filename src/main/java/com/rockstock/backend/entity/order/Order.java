@@ -50,6 +50,12 @@ public class Order {
     @Column(name = "total_payment", nullable = false, precision = 15, scale = 2)
     private BigDecimal totalPayment;
 
+    @Column(name = "transaction_token")
+    private String transactionToken;
+
+    @Column(name = "payment_redirect_url")
+    private String paymentRedirectUrl;
+
     @NotNull
     @Column(name = "created_at", nullable = false)
     @ColumnDefault("CURRENT_TIMESTAMP")
@@ -105,8 +111,8 @@ public class Order {
     @JoinColumn(name = "order_status_id", nullable = false)
     private OrderStatus orderStatus;
 
-//    @JsonManagedReference
-//    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-//    private Set<OrderItem> orderItems = new HashSet<>();
+    @JsonManagedReference
+    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<OrderItem> orderItems = new HashSet<>();
 }
 

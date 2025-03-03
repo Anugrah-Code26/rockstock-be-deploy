@@ -25,7 +25,7 @@ public class PaymentController {
             Long orderId = Long.parseLong(requestBody.get("order_id").toString());
             Double amount = Double.parseDouble(requestBody.get("amount").toString());
 
-            String transactionToken = midtransPaymentService.createTransactionToken(orderId, amount);
+            String transactionToken = midtransPaymentService.createTransactionToken(String.valueOf(orderId), amount).toString();
             return ResponseEntity.ok(Map.of("transaction_token", transactionToken));
 
         } catch (MidtransError | NumberFormatException e) {
@@ -35,8 +35,12 @@ public class PaymentController {
 
     @PostMapping("/webhook")
     public ResponseEntity<String> handlePaymentNotification(@RequestBody Map<String, Object> payload) {
-        midtransPaymentService.processPaymentNotification(payload);
-        return ResponseEntity.ok("Notification received successfully");
+        try {
+            midtransPaymentService.processPaymentNotification(payload);
+            return ResponseEntity.ok("Webhook received and processed successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error processing webhook: " + e.getMessage());
+        }
     }
 
     // Read / Get

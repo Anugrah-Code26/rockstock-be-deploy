@@ -34,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -94,12 +95,13 @@ public class CreateOrderServiceImpl implements CreateOrderService {
         String orderCode = OrderCodeGenerator.generateOrderCode(userId, savedOrder.getId(), LocalDate.now());
         savedOrder.setOrderCode(orderCode);
 
-        if (paymentMethod.getName().equals("Manual Bank Transfer")) {
-            savedOrder.setPaymentMethod(paymentMethod);
-        } else {
-            midtransPaymentService.createTransactionToken(savedOrder.getId(), savedOrder.getTotalPayment().doubleValue());
-            savedOrder.setPaymentMethod(paymentMethod);
+        if (!paymentMethod.getName().equals("Manual Bank Transfer")) {
+            Map<String, String> midtransResponse = midtransPaymentService.createTransactionToken(savedOrder.getOrderCode(), savedOrder.getTotalPayment().doubleValue());
+            savedOrder.setTransactionToken(midtransResponse.get("token"));
+            savedOrder.setPaymentRedirectUrl(midtransResponse.get("redirect_url"));
         }
+
+        savedOrder.setPaymentMethod(paymentMethod);
 
         // Save order again with order code & payment method
         orderRepository.save(savedOrder);

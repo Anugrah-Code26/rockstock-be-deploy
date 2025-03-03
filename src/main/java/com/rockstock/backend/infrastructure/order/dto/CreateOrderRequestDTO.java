@@ -25,13 +25,11 @@ public class CreateOrderRequestDTO {
 
     public Order toEntity(
             Address address
-//            PaymentMethod paymentMethod
     ) {
         Order order = new Order();
 
         order.setDeliveryCost(deliveryCost);
         order.setAddress(address);
-//        order.setPaymentMethod(paymentMethod);
 
         return order;
     }

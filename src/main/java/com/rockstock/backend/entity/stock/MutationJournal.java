@@ -36,6 +36,12 @@ public class MutationJournal {
 
     private String description;
 
+    @Column(name = "mutation_status", nullable = false)
+    private MutationStatus mutationStatus;
+
+    @Column(name = "stock_change_type", nullable = false)
+    private StockChangeType stockChangeType;
+
     @Column(name = "created_at", nullable = false)
     @ColumnDefault("CURRENT_TIMESTAMP")
     private OffsetDateTime createdAt;
@@ -69,15 +75,4 @@ public class MutationJournal {
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "destination_warehouse_id")
-    private Warehouse destinationWarehouse;
-
-    @JsonBackReference
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "stock_change_type_id", nullable = false)
-    private StockChangeType stockChangeType;
-
-    @JsonBackReference
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "mutation_statuses_id", nullable = false)
-    private MutationStatus mutationStatus;
-}
+    private Warehouse destinationWarehouse;}

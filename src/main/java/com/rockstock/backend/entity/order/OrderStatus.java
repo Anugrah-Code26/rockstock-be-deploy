@@ -48,6 +48,9 @@ public class OrderStatus {
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
 
+    public OrderStatus(OrderStatusList orderStatusList) {
+    }
+
     @PrePersist
     protected void onCreate() {
         createdAt = OffsetDateTime.now();

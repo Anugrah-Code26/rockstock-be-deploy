@@ -49,10 +49,6 @@ public class GetOrderServiceImpl implements GetOrderService {
             throw new IllegalArgumentException("Invalid filter combination");
         }
 
-        if (filteredOrders.isEmpty()) {
-            throw new DataNotFoundException("No orders found!");
-        }
-
         return filteredOrders.stream().map(GetOrderResponseDTO::new).toList();
     }
 

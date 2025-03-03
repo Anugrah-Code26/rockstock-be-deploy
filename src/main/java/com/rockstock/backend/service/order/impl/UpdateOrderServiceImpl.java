@@ -91,9 +91,6 @@ public class UpdateOrderServiceImpl implements UpdateOrderService {
             }
             case PROCESSING -> {
                 if (userRole.equals("Super Admin") && newStatus == OrderStatusList.CANCELED) {
-
-                    // ADD CODE TO REFUND (FEATURE 3)
-
                     order.setOrderStatus(orderStatusRepository.findByStatus(newStatus));
                 } else if (userRole.equals("Super Admin") && newStatus == OrderStatusList.ON_DELIVERY) {
 

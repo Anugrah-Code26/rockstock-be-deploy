@@ -1,6 +1,7 @@
 package com.rockstock.backend.infrastructure.cart.dto;
 
 import com.rockstock.backend.entity.cart.CartItem;
+import com.rockstock.backend.infrastructure.productPicture.dto.GetProductPicturesResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,6 +22,7 @@ public class GetCartItemResponseDTO {
     private Long productId;
     private String productName;
     private BigDecimal productPrice;
+    private GetProductPicturesResponseDTO productPictures;
 
     public GetCartItemResponseDTO(CartItem cartItem) {
         this.cartItemId = cartItem.getId();
@@ -31,5 +33,10 @@ public class GetCartItemResponseDTO {
         this.productId = cartItem.getProduct().getId();
         this.productName = cartItem.getProduct().getProductName();
         this.productPrice = cartItem.getProduct().getPrice();
+        this.productPictures = cartItem.getProduct().getProductPictures().stream()
+                .filter(picture -> picture.getPosition() == 1)
+                .findFirst()
+                .map(GetProductPicturesResponseDTO::fromProductPicture)
+                .orElse(null);
     }
 }
