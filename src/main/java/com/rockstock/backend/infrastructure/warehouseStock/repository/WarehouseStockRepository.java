@@ -40,4 +40,8 @@ public interface WarehouseStockRepository extends JpaRepository<WarehouseStock, 
 
     @Query("SELECT COALESCE(SUM(ws.stockQuantity), 0) FROM WarehouseStock ws WHERE ws.product.id = :productId AND ws.deletedAt IS NULL")
     BigDecimal getTotalStockByProductId(@Param("productId") Long productId);
+
+    @Query("SELECT COALESCE(SUM(ws.stockQuantity), 0) FROM WarehouseStock ws " +
+            "WHERE ws.product = :product AND ws.deletedAt IS NULL")
+    Long sumStockByProduct(@Param("product") Product product);
 }

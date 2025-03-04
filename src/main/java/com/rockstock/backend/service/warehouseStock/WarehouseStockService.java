@@ -55,7 +55,9 @@ public class WarehouseStockService {
                 savedStock.getId(),
                 savedStock.getStockQuantity(),
                 product.getProductName(),
-                warehouse.getName()
+                product.getId(),
+                warehouse.getName(),
+                warehouse.getId()
         );
     }
 
@@ -90,7 +92,9 @@ public class WarehouseStockService {
                 stock.getId(),
                 stock.getStockQuantity(),
                 stock.getProduct().getProductName(),
-                stock.getWarehouse().getName()
+                stock.getProduct().getId(),
+                stock.getWarehouse().getName(),
+                stock.getWarehouse().getId()
         ));
     }
 
@@ -102,7 +106,9 @@ public class WarehouseStockService {
                 stock.getId(),
                 stock.getStockQuantity(),
                 stock.getProduct().getProductName(),
-                stock.getWarehouse().getName()
+                stock.getProduct().getId(),
+                stock.getWarehouse().getName(),
+                stock.getWarehouse().getId()
         );
     }
 }

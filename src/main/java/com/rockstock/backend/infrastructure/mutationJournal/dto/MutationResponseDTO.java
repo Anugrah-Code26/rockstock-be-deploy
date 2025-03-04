@@ -1,4 +1,4 @@
-package com.rockstock.backend.infrastructure.mutation.dto;
+package com.rockstock.backend.infrastructure.mutationJournal.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

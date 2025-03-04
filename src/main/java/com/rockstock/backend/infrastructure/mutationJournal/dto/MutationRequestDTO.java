@@ -1,4 +1,4 @@
-package com.rockstock.backend.infrastructure.mutation.dto;
+package com.rockstock.backend.infrastructure.mutationJournal.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -18,6 +18,6 @@ public class MutationRequestDTO {
     @NotNull
     private Long destinationWarehouseId;
 
-    @NotNull
+    @NotNull(message = "Quantity cannot be null")
     private Long stockQuantity;
 }

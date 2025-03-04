@@ -11,5 +11,7 @@ public class WarehouseStockResponseDTO {
     private Long stockId;
     private Long stockQuantity;
     private String productName;
+    private Long productId;
     private String warehouseName;
+    private Long warehouseId;
 }

@@ -58,7 +58,7 @@ public class ProductCategoryService {
 
     @Transactional
     public CreateProductCategoryResponseDTO updateProductCategory(UpdateProductCategoryRequestDTO requestDTO) throws IOException {
-        ProductCategory productCategory = productCategoryRepository.findById(requestDTO.getCategoryId())
+        ProductCategory productCategory = productCategoryRepository.findByCategoryId(requestDTO.getCategoryId())
                 .orElseThrow(() -> new EntityNotFoundException("Category not found: " + requestDTO.getCategoryId()));
 
         // Update category name if provided

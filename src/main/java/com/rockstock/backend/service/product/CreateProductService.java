@@ -32,7 +32,7 @@ public class CreateProductService {
         product.setCreatedAt(OffsetDateTime.now());
         product.setUpdatedAt(OffsetDateTime.now());
 
-        ProductCategory defaultCategory = productCategoryRepository.findById(1L)
+        ProductCategory defaultCategory = productCategoryRepository.findByCategoryId(1L)
                 .orElseThrow(() -> new RuntimeException("Default category not found"));
         product.setProductCategory(defaultCategory);
 

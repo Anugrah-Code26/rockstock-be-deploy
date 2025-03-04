@@ -28,14 +28,14 @@ public class WarehouseStockController {
         // Check if productId is provided
         if (productId == null) {
             return ResponseEntity.badRequest().body(new WarehouseStockResponseDTO(
-                    null, null, "Invalid product", "Invalid warehouse"
+                    null, null, "Invalid product", null, "Invalid warehouse", null
             ));
         }
 
         // Check if warehouseId is provided
         if (warehouseId == null) {
             return ResponseEntity.badRequest().body(new WarehouseStockResponseDTO(
-                    null, null, "Invalid product", "Invalid warehouse"
+                    null, null, "Invalid product", null, "Invalid warehouse", null
             ));
         }
 
