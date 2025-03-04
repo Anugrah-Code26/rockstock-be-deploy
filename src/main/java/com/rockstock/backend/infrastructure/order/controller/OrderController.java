@@ -26,7 +26,6 @@ public class OrderController {
     private final CreateOrderService createOrderService;
     private final GetOrderService getOrderService;
     private final GetOrderItemService getOrderItemService;
-    private final GetOrderStatusService getOrderStatusService;
     private final UpdateOrderService updateOrderService;
 
     // Create
@@ -69,17 +68,6 @@ public class OrderController {
     @GetMapping("/items/order-item")
     public ResponseEntity<?> getByIdAndOrderId(@RequestParam Long id, @RequestParam Long orderId) {
         return ApiResponse.success(HttpStatus.OK.value(), "Order items retrieved successfully!", getOrderItemService.getByIdAndOrderId(id, orderId));
-    }
-
-    // Order Status
-    @GetMapping("/statuses")
-    public ResponseEntity<?> getAllOrderStatus() {
-        return ApiResponse.success(HttpStatus.OK.value(), "Orders retrieved successfully!", getOrderStatusService.getAllOrderStatus());
-    }
-
-    @GetMapping("/statuses/status")
-    public ResponseEntity<?> getByOrderStatusName(OrderStatusList status) {
-        return ApiResponse.success(HttpStatus.OK.value(), "Orders retrieved successfully!", getOrderStatusService.getByOrderStatusName(status));
     }
 
     // Update

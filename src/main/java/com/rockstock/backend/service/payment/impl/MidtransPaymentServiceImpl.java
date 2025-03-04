@@ -4,20 +4,16 @@ import com.midtrans.Config;
 import com.midtrans.httpclient.SnapApi;
 import com.midtrans.httpclient.error.MidtransError;
 import com.rockstock.backend.entity.order.Order;
-import com.rockstock.backend.entity.order.OrderStatus;
 import com.rockstock.backend.entity.order.OrderStatusList;
 import com.rockstock.backend.infrastructure.order.repository.OrderRepository;
 import com.rockstock.backend.service.order.UpdateOrderService;
 import com.rockstock.backend.service.payment.MidtransPaymentService;
 import lombok.RequiredArgsConstructor;
-import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -64,13 +60,13 @@ public class MidtransPaymentServiceImpl implements MidtransPaymentService {
         Order order = orderRepository.findByOrderCode(orderCode)
                 .orElseThrow(() -> new RuntimeException("❌ Order not found with Order Code: " + orderCode));
 
-        System.out.println("🔍 Found order: " + orderCode + " with current status: " + order.getOrderStatus());
+        System.out.println("🔍 Found order: " + orderCode + " with current status: " + order.getStatus());
 
         switch (transactionStatus) {
             case "settlement", "capture", "success" -> {
-                if (order.getOrderStatus().getStatus() == OrderStatusList.WAITING_FOR_PAYMENT) {
+                if (order.getStatus() == OrderStatusList.WAITING_FOR_PAYMENT) {
                     System.out.println("✅ Payment successful. Updating order status to PROCESSING...");
-                    order.setOrderStatus(new OrderStatus(OrderStatusList.PROCESSING));
+                    order.setStatus(OrderStatusList.PROCESSING);
                     orderRepository.save(order); // Ensure the update is persisted
                     System.out.println("✅ Order " + orderCode + " updated to PROCESSING in the database.");
                 } else {
@@ -82,7 +78,7 @@ public class MidtransPaymentServiceImpl implements MidtransPaymentService {
             }
             case "deny", "cancel", "expire", "failure" -> {
                 System.out.println("❌ Payment failed. Updating order status to CANCELED...");
-                order.setOrderStatus(new OrderStatus(OrderStatusList.CANCELED));
+                order.setStatus(OrderStatusList.CANCELED);
                 orderRepository.save(order);
                 System.out.println("✅ Order " + orderCode + " updated to CANCELED in the database.");
             }

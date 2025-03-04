@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface GetOrderService {
-    List<GetOrderResponseDTO> getFilteredOrders(Long warehouseId, OrderStatusList status);//
+    List<GetOrderResponseDTO> getFilteredOrders(Long warehouseId, OrderStatusList status);
     List<GetOrderResponseDTO> getAllByPaymentMethodName(String methodName);
     Optional<GetOrderResponseDTO> getByOrder(Long orderId, String orderCode);
 }

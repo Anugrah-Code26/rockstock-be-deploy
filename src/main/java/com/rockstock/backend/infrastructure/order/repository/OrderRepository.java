@@ -14,8 +14,8 @@ import java.util.Optional;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
-    @Query("SELECT o FROM Order o WHERE o.orderStatus.status = :status AND o.createdAt < :time")
-    List<Order> findByOrderStatusAndCreatedAtBefore(
+    @Query("SELECT o FROM Order o WHERE o.status = :status AND o.createdAt < :time")
+    List<Order> findByStatusAndCreatedAtBefore(
             @Param("status") OrderStatusList status,
             @Param("time") OffsetDateTime time
     );
@@ -25,7 +25,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "JOIN FETCH o.address a " +
             "JOIN FETCH a.subDistrict " +
             "JOIN FETCH o.warehouse " +
-            "JOIN FETCH o.orderStatus " +
             "JOIN FETCH o.paymentMethod")
     List<Order> findAllWithDetails();
 
@@ -35,14 +34,14 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT o FROM Order o WHERE o.warehouse.id = :warehouseId")
     List<Order> findAllByWarehouseId(Long warehouseId);
 
-    @Query("SELECT o FROM Order o WHERE o.orderStatus.status = :status")
-    List<Order> findAllByOrderStatus(OrderStatusList status);
+    @Query("SELECT o FROM Order o WHERE o.status = :status")
+    List<Order> findAllByStatus(OrderStatusList status);
 
-    @Query("SELECT o FROM Order o WHERE o.user.id = :userId AND o.orderStatus.status = :status")
-    List<Order> findAllByUserIdAndOrderStatus(Long userId, OrderStatusList status);
+    @Query("SELECT o FROM Order o WHERE o.user.id = :userId AND o.status = :status")
+    List<Order> findAllByUserIdAndStatus(Long userId, OrderStatusList status);
 
-    @Query("SELECT o FROM Order o WHERE o.warehouse.id = :warehouseId AND o.orderStatus.status = :status")
-    List<Order> findAllByWarehouseIdAndOrderStatus(Long warehouseId, OrderStatusList status);
+    @Query("SELECT o FROM Order o WHERE o.warehouse.id = :warehouseId AND o.status = :status")
+    List<Order> findAllByWarehouseIdAndStatus(Long warehouseId, OrderStatusList status);
 
     @Query("SELECT o FROM Order o WHERE o.paymentMethod.name = :methodName")
     List<Order> findAllByPaymentMethodName(String methodName);

@@ -27,7 +27,7 @@ public class GetOrderResponseDTO {
     private String addressDetail;
     private String addressSubDistrict;
     private String warehouseName;
-    private OrderStatusList orderStatus;
+    private OrderStatusList status;
     private String paymentMethod;
     private GetOrderItemResponseDTO firstOrderItem;
 
@@ -46,7 +46,7 @@ public class GetOrderResponseDTO {
         this.addressDetail = order.getAddress().getAddressDetail();
         this.addressSubDistrict = order.getAddress().getSubDistrict().getName();
         this.warehouseName = order.getWarehouse().getName();
-        this.orderStatus = order.getOrderStatus().getStatus();
+        this.status = order.getStatus();
         this.paymentMethod = order.getPaymentMethod().getName();
         this.firstOrderItem = order.getOrderItems().stream().findFirst().map(GetOrderItemResponseDTO::new).orElse(null);
     }

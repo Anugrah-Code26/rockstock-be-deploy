@@ -34,17 +34,17 @@ public class GetOrderServiceImpl implements GetOrderService {
             filteredOrders = orderRepository.findAllWithDetails();
         } else if ("Customer".equals(role)) {
             filteredOrders = status != null
-                    ? orderRepository.findAllByUserIdAndOrderStatus(userId, status)
+                    ? orderRepository.findAllByUserIdAndStatus(userId, status)
                     : orderRepository.findAllByUserId(userId);
         } else if (warehouseId != null) {
             if ("Warehouse Admin".equals(role) && !warehouseIds.contains(warehouseId)) {
                 throw new AuthorizationDeniedException("You do not have access to this warehouse!");
             }
             filteredOrders = (status != null)
-                    ? orderRepository.findAllByWarehouseIdAndOrderStatus(warehouseId, status)
+                    ? orderRepository.findAllByWarehouseIdAndStatus(warehouseId, status)
                     : orderRepository.findAllByWarehouseId(warehouseId);
         } else if (status != null && "Super Admin".equals(role)) {
-            filteredOrders = orderRepository.findAllByOrderStatus(status);
+            filteredOrders = orderRepository.findAllByStatus(status);
         } else {
             throw new IllegalArgumentException("Invalid filter combination");
         }

@@ -36,9 +36,11 @@ public class MutationJournal {
 
     private String description;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "mutation_status", nullable = false)
     private MutationStatus mutationStatus;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "stock_change_type", nullable = false)
     private StockChangeType stockChangeType;
 

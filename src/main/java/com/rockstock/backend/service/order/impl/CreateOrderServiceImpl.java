@@ -8,7 +8,6 @@ import com.rockstock.backend.entity.cart.Cart;
 import com.rockstock.backend.entity.cart.CartItem;
 import com.rockstock.backend.entity.geolocation.Address;
 import com.rockstock.backend.entity.order.Order;
-import com.rockstock.backend.entity.order.OrderStatus;
 import com.rockstock.backend.entity.order.OrderStatusList;
 import com.rockstock.backend.entity.payment.PaymentMethod;
 import com.rockstock.backend.entity.user.User;
@@ -18,7 +17,6 @@ import com.rockstock.backend.infrastructure.cart.repository.CartItemRepository;
 import com.rockstock.backend.infrastructure.cart.repository.CartRepository;
 import com.rockstock.backend.infrastructure.order.dto.CreateOrderRequestDTO;
 import com.rockstock.backend.infrastructure.order.repository.OrderRepository;
-import com.rockstock.backend.infrastructure.order.repository.OrderStatusRepository;
 import com.rockstock.backend.infrastructure.payment.repository.PaymentMethodRepository;
 import com.rockstock.backend.infrastructure.user.auth.security.Claims;
 import com.rockstock.backend.infrastructure.user.repository.UserRepository;
@@ -45,7 +43,6 @@ public class CreateOrderServiceImpl implements CreateOrderService {
     private final AddressRepository addressRepository;
     private final WarehouseRepository warehouseRepository;
     private final PaymentMethodRepository paymentMethodRepository;
-    private final OrderStatusRepository orderStatusRepository;
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final CreateOrderItemService createOrderItemService;
@@ -71,11 +68,6 @@ public class CreateOrderServiceImpl implements CreateOrderService {
         PaymentMethod paymentMethod = paymentMethodRepository.findById(req.getPaymentMethodId())
                 .orElseThrow(() -> new DataNotFoundException("Payment Method not found"));
 
-        OrderStatus orderStatus = orderStatusRepository.findByStatus(OrderStatusList.WAITING_FOR_PAYMENT);
-        if (orderStatus == null) {
-            throw new DataNotFoundException("Order status WAITING_FOR_PAYMENT not found");
-        }
-
         Warehouse nearestWarehouse = findNearestWarehouse(address.getLatitude(), address.getLongitude());
         BigDecimal totalPrice = calculateTotalPrice(userId);
 
@@ -86,7 +78,7 @@ public class CreateOrderServiceImpl implements CreateOrderService {
         order.setTotalPayment(totalPrice.add(req.getDeliveryCost()));
         order.setUser(user);
         order.setWarehouse(nearestWarehouse);
-        order.setOrderStatus(orderStatus);
+        order.setStatus(OrderStatusList.WAITING_FOR_PAYMENT);
 
         // Save order first to get orderId
         Order savedOrder = orderRepository.save(order);

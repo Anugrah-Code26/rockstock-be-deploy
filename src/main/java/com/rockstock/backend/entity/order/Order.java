@@ -56,6 +56,10 @@ public class Order {
     @Column(name = "payment_redirect_url")
     private String paymentRedirectUrl;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private OrderStatusList status;
+
     @NotNull
     @Column(name = "created_at", nullable = false)
     @ColumnDefault("CURRENT_TIMESTAMP")
@@ -105,11 +109,6 @@ public class Order {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_method_id", nullable = false)
     private PaymentMethod paymentMethod;
-
-    @JsonBackReference
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_status_id", nullable = false)
-    private OrderStatus orderStatus;
 
     @JsonManagedReference
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
