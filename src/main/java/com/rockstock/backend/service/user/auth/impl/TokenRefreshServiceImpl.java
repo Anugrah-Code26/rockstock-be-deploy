@@ -16,6 +16,6 @@ public class TokenRefreshServiceImpl implements TokenRefreshService {
     @Override
     public TokenPairResponseDTO refreshAccessToken(String refreshToken) {
         String newAccessToken = tokenService.refreshAccessToken(refreshToken);
-        return new TokenPairResponseDTO(newAccessToken, refreshToken, "Bearer");
+        return new TokenPairResponseDTO(newAccessToken, refreshToken, "Bearer","");
     }
 }

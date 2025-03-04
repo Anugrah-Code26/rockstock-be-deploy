@@ -1,33 +1,22 @@
 package com.rockstock.backend.infrastructure.user.auth.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class OAuthLoginResponse {
+    private String accessToken;  // JWT access token
+    private String refreshToken;  // JWT refresh token
+    private String fullname;  // Menggunakan fullname sesuai database
+    private String email;  // User's email from OAuth
+    private String profilePictureUrl;  // User's profile picture URL from OAuth
 
-    private String accessToken;
-    private String refreshToken;
-    private String username;
-
-    // Getters and Setters
-    public String getAccessToken() {
-        return accessToken;
-    }
-
-    public void setAccessToken(String accessToken) {
+    public OAuthLoginResponse(String accessToken, String refreshToken, String fullname, String email, String profilePictureUrl) {
         this.accessToken = accessToken;
-    }
-
-    public String getRefreshToken() {
-        return refreshToken;
-    }
-
-    public void setRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
+        this.fullname = fullname; // Fix: Sesuai dengan database
+        this.email = email;
+        this.profilePictureUrl = profilePictureUrl;
     }
 }

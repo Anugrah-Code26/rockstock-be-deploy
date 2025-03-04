@@ -1,14 +1,15 @@
 package com.rockstock.backend.infrastructure.admin.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
-public class AdminUserResponse {
+public class AdminResponseDTO {
     private Long id;
-    private String fullName;
     private String email;
     private String role;
-    private boolean active;
+    private String fullname;
 }

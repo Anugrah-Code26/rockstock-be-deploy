@@ -9,10 +9,10 @@ import lombok.Data;
 import java.time.OffsetDateTime;
 
 @Data
-public class UpdateProfileRequest {
+public class UpdateProfileRequestDTO {
     @NotBlank(message = "Fullname is mandatory")
     @Size(max = 100, message = "Fullname can have at most 100 characters")
-    private String fullName;
+    private String fullname;
 
     @Email(message = "Email should be valid")
     private String email;
@@ -21,10 +21,8 @@ public class UpdateProfileRequest {
 
     private OffsetDateTime birthDate;
 
+    private String photoProfileUrl;
+
     @Size(max = 10, message = "Gender can have at most 10 characters")
     private String gender;
-
-    public @NotNull(message = "Fullname is mandatory") @Size(max = 100, message = "Fullname can have at most 100 characters") String getFullname() {
-        return "";
-    }
 }

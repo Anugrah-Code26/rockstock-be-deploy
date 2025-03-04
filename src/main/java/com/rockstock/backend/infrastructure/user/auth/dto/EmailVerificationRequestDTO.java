@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class VerifyEmailRequestDTO {
+public class EmailVerificationRequestDTO {
     @NotBlank(message = "Verification token is required.")
     private String token;
 }

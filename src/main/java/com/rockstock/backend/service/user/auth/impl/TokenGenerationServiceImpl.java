@@ -12,7 +12,6 @@ import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -42,27 +41,22 @@ public class TokenGenerationServiceImpl implements TokenGenerationService {
                 .orElseThrow(() -> new DataNotFoundException("User not found"));
 
 //        String scope = authentication.getAuthorities().stream()
-//                .map(GrantedAuthority::getAuthority)
+//               .map(GrantedAuthority::getAuthority)
 //                .reduce((a, b) -> a + " " + b)
-//                .orElse("");
+//               .orElse("");
 
         String roles = user.getUserRoles().stream()
                 .map(userRole -> userRole.getRole().getName())
                 .collect(Collectors.joining(" "));
-
-        List<Long> warehouseIds = user.getWarehouseAdmins().stream()
-                .map(warehouseAdmin -> warehouseAdmin.getWarehouse().getId())
-                .toList();
-
+        System.out.println("check " + roles + " " + user.getId());
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuedAt(now)
                 .expiresAt(now.plusSeconds(expiry))
                 .subject(email)
-                .claim("roles", roles)
-                .claim("warehouseIds", warehouseIds)
+                .claim("scope", roles)
                 .claim("userId", user.getId())
                 .claim("type", tokenType.name())
-         .build();
+                .build();
 
         JwsHeader jwsHeader = JwsHeader.with(() -> "HS256").build();
         return this.jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();
@@ -85,4 +79,21 @@ public class TokenGenerationServiceImpl implements TokenGenerationService {
         JwsHeader jwsHeader = JwsHeader.with(() -> "HS256").build();
         return this.jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();
     }
+
+    public String generateEmailVerificationToken(String email, Long userId) {
+        Instant now = Instant.now();
+        long expiry = 3600L; // Token berlaku 1 jam
+
+        JwtClaimsSet claims = JwtClaimsSet.builder()
+                .issuedAt(now)
+                .expiresAt(now.plusSeconds(expiry))
+                .subject(email)
+                .claim("userId", userId)
+                .claim("type", "EMAIL_VERIFICATION") // Tambahkan tipe khusus
+                .build();
+
+        JwsHeader jwsHeader = JwsHeader.with(() -> "HS256").build();
+        return this.jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();
+    }
+
 }

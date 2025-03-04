@@ -11,6 +11,8 @@ import com.rockstock.backend.service.address.CreateAddressService;
 import com.sun.jdi.request.DuplicateRequestException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.OffsetDateTime;
+
 
 import java.util.List;
 import java.util.Optional;
@@ -46,16 +48,30 @@ public class CreateAddressServiceImpl implements CreateAddressService {
                 .orElseThrow(() -> new RuntimeException("City not found"));
 
         Address newAddress = new Address();
-
         newAddress.setUser(user);
         newAddress.setCity(city);
+        newAddress.setLabel(req.getLabel());
+        newAddress.setAddressDetail(req.getAddressDetail());
+        newAddress.setLongitude(req.getLongitude());
+        newAddress.setLatitude(req.getLatitude());
+        newAddress.setNote(req.getNote());
+
+        // Pastikan tanggal tidak null
+        newAddress.setCreatedAt(OffsetDateTime.now());
+        newAddress.setUpdatedAt(OffsetDateTime.now());
 
         List<Address> checkAddress = addressRepository.findByUserId(req.getUserId());
         if (checkAddress.isEmpty()) {
             newAddress.setIsMain(true);
+        } else {
+            newAddress.setIsMain(false); // Set nilai isMain secara eksplisit
         }
-
-        return addressRepository.save(newAddress);
+        try {
+            return addressRepository.save(newAddress);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error while saving address: " + e.getMessage());
+        }
     }
 
 }

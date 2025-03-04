@@ -1,11 +1,12 @@
-package com.rockstock.backend.service.user.impl;
+package com.rockstock.backend.service.user.auth.impl;
 
 import com.rockstock.backend.entity.user.Role;
 import com.rockstock.backend.entity.user.User;
-import com.rockstock.backend.infrastructure.user.dto.CreateUserRequestDTO;
+import com.rockstock.backend.infrastructure.user.auth.CreateUserService;
+import com.rockstock.backend.infrastructure.user.auth.dto.CreateUserRequestDTO;
 import com.rockstock.backend.infrastructure.user.repository.RoleRepository;
 import com.rockstock.backend.infrastructure.user.repository.UserRepository;
-import com.rockstock.backend.service.user.CreateUserService;
+import com.rockstock.backend.service.user.auth.EmailVerificationService;
 import com.sun.jdi.request.DuplicateRequestException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,15 +20,18 @@ public class CreateUserServiceImpl implements CreateUserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailVerificationService emailVerificationService;
 
     public CreateUserServiceImpl(
             UserRepository userRepository,
             RoleRepository roleRepository,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            EmailVerificationService emailVerificationService
     ) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailVerificationService = emailVerificationService;
     }
 
     @Override
@@ -38,9 +42,8 @@ public class CreateUserServiceImpl implements CreateUserService {
             throw new DuplicateRequestException("Email already exists");
         }
 
-        // Create user entity
+        // Create user entity without password
         User newUser = req.toEntity();
-        newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
 
         // Assign "Customer" role
         Optional<Role> customerRole = roleRepository.findByName("Customer");
@@ -50,8 +53,14 @@ public class CreateUserServiceImpl implements CreateUserService {
             throw new RuntimeException("Role 'Customer' not found");
         }
 
+        // Set verification status to false during registration
+        newUser.setIsVerified(false);
+
         // Save user entity first to persist the user
         newUser = userRepository.save(newUser);
+
+        // Send verification email after registration
+        emailVerificationService.sendVerificationEmail(newUser.getEmail());
 
         return newUser;
     }

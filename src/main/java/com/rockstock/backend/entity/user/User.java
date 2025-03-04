@@ -44,13 +44,16 @@ public class User {
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 
-    @NotNull(message = "Password is mandatory")
     @Size(min = 6, message = "Password must be at least 6 characters")
-    @Column(nullable = false)
+    @Column
     private String password;
 
     @Column(name = "profile_picture_url")
     private String photoProfileUrl;
+
+    @Column(name = "google_image_url")
+    private String googleImageUrl;
+
 
     @Column(name = "birth_date")
     private OffsetDateTime birthDate;
@@ -97,6 +100,11 @@ public class User {
         deletedAt = OffsetDateTime.now();
     }
 
+    @NotNull
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
+
+
     // Relationships
     @JsonBackReference
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
@@ -105,7 +113,7 @@ public class User {
 
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_provider_id", referencedColumnName = "user_provider_id")
+    @JoinColumn(name = "user_provider_id", referencedColumnName = "user_provider_id", nullable = true)
     private UserProvider userProvider;
 
     @JsonManagedReference

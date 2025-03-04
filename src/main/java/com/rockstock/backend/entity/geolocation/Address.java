@@ -1,5 +1,6 @@
 package com.rockstock.backend.entity.geolocation;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.rockstock.backend.entity.user.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -73,11 +74,17 @@ public class Address {
     }
 
     // Relationships
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "city_id", nullable = false)
     private City city;
 }
+
+//    @JsonManagedReference
+//    @OneToMany(mappedBy = "address", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+//    private Set<Order> orders = new HashSet<>();

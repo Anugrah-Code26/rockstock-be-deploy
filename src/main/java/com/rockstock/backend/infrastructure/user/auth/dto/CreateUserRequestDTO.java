@@ -1,4 +1,4 @@
-package com.rockstock.backend.infrastructure.user.dto;
+package com.rockstock.backend.infrastructure.user.auth.dto;
 
 import com.rockstock.backend.entity.user.Role;
 import com.rockstock.backend.entity.user.User;
@@ -20,16 +20,12 @@ import java.util.Set;
 public class CreateUserRequestDTO {
     @NotBlank
     @Size(min = 1, max = 100)
-    private String fullName;
+    private String fullname;
 
     @NotBlank
     @Email
     @Size(max = 100)
     private String email;
-
-    @NotBlank
-    @Size(min = 8, max = 255)
-    private String password;
 
     @NotNull
     private OffsetDateTime birthdate;
@@ -42,9 +38,8 @@ public class CreateUserRequestDTO {
     public User toEntity() {
         User user = new User();
 
-        user.setFullname(fullName);
+        user.setFullname(fullname);
         user.setEmail(email);
-        user.setPassword(password);
         user.setBirthDate(birthdate);
         user.setGender(gender);
         Set<Role> roles = new HashSet<>();
