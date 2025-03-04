@@ -1,9 +1,7 @@
 package com.rockstock.backend.service.user;
 
-import com.rockstock.backend.infrastructure.user.dto.ChangePasswordRequest;
-import com.rockstock.backend.infrastructure.user.dto.UpdateProfileRequest;
-import com.rockstock.backend.infrastructure.user.dto.UploadAvatarResponse;
-import com.rockstock.backend.infrastructure.user.dto.UserProfileResponse;
+import com.rockstock.backend.entity.user.User;
+import com.rockstock.backend.infrastructure.user.dto.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;

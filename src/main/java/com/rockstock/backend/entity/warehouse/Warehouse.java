@@ -1,10 +1,8 @@
 package com.rockstock.backend.entity.warehouse;
 
-//import com.rockstock.backend.entity.geolocation.City;
-//import com.rockstock.backend.entity.stock.StockJournal;
-//import com.rockstock.backend.entity.stock.WarehouseStock;
-import com.rockstock.backend.entity.stock.MutationJournal;
+import com.rockstock.backend.entity.geolocation.City;
 import com.rockstock.backend.entity.stock.WarehouseStock;
+import com.rockstock.backend.entity.stock.MutationJournal;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -16,8 +14,6 @@ import org.hibernate.annotations.ColumnDefault;
 import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.Set;
-//import java.util.HashSet;
-//import java.util.Set;
 
 @Entity
 @Table(name = "warehouses", schema = "rockstock")
@@ -40,13 +36,13 @@ public class Warehouse {
     @Column(nullable = false)
     private String address;
 
-//    @NotNull
-//    @Column(nullable = false)
-//    private String longitude;
-//
-//    @NotNull
-//    @Column(nullable = false)
-//    private String latitude;
+    @NotNull
+    @Column(nullable = false)
+    private String longitude;
+
+    @NotNull
+    @Column(nullable = false)
+    private String latitude;
 
     @Column(name = "deleted_at")
     private OffsetDateTime deletedAt;
@@ -77,20 +73,20 @@ public class Warehouse {
         deletedAt = OffsetDateTime.now();
     }
 
-    // Relationships
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "city_id", nullable = false)
-//    private City city;
-//
-//    @OneToMany(mappedBy = "warehouse", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-//    private Set<WarehouseAdmin> warehouseAdmins = new HashSet<>();
-//
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "city_id", nullable = false)
+    private City city;
+
+    @OneToMany(mappedBy = "warehouse", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<WarehouseAdmin> warehouseAdmins = new HashSet<>();
+
     @OneToMany(mappedBy = "warehouse", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<WarehouseStock> warehouseStocks = new HashSet<>();
 
-//    @OneToMany(mappedBy = "originWarehouse", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-//    private Set<MutationJournal> originStockJournals = new HashSet<>();
-//
-//    @OneToMany(mappedBy = "destinationWarehouse", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-//    private Set<MutationJournal> destinationStockJournals = new HashSet<>();
+    @OneToMany(mappedBy = "originWarehouse", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<MutationJournal> originStockJournals = new HashSet<>();
+
+    @OneToMany(mappedBy = "destinationWarehouse", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<MutationJournal> destinationStockJournals = new HashSet<>();
 }
