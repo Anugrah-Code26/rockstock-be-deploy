@@ -4,6 +4,7 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.rockstock.backend.entity.user.User;
 import com.rockstock.backend.infrastructure.user.auth.security.Claims;
+import com.rockstock.backend.infrastructure.user.dto.GetAllUsersDTO;
 import com.rockstock.backend.infrastructure.user.repository.UserRepository;
 import com.rockstock.backend.infrastructure.user.dto.ChangePasswordRequest;
 import com.rockstock.backend.infrastructure.user.dto.UpdateProfileRequestDTO;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -59,6 +61,13 @@ public class UserServiceImpl implements UserService {
 
         return user;
     }
+
+    @Override
+    public List<GetAllUsersDTO> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return users.stream().map(GetAllUsersDTO::fromEntity).toList();
+    }
+
 
 
     @Transactional

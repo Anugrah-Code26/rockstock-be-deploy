@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import jakarta.validation.Valid;
 
+import java.util.List;
 import java.util.Map;
+
 
 @RestController
 @RequestMapping("/api/v1/user")
@@ -30,6 +32,12 @@ public class UserController {
         User userProfile = userService.getUserProfile();
         return ApiResponse.success(HttpStatus.OK.value(), "User profile retrieved successfully", userProfile);
     }
+
+    @GetMapping
+    public ResponseEntity<List<GetAllUsersDTO>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
+
 
     @PutMapping("/profile")
     public ResponseEntity<?> updateUserProfile(@RequestBody UpdateProfileRequestDTO request) {
