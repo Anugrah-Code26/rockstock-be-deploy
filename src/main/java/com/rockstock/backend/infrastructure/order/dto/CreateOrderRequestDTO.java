@@ -2,7 +2,6 @@ package com.rockstock.backend.infrastructure.order.dto;
 
 import com.rockstock.backend.entity.geolocation.Address;
 import com.rockstock.backend.entity.order.Order;
-import com.rockstock.backend.entity.payment.PaymentMethod;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;

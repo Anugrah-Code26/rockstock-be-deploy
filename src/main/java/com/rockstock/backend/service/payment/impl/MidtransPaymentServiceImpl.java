@@ -6,7 +6,6 @@ import com.midtrans.httpclient.error.MidtransError;
 import com.rockstock.backend.entity.order.Order;
 import com.rockstock.backend.entity.order.OrderStatusList;
 import com.rockstock.backend.infrastructure.order.repository.OrderRepository;
-import com.rockstock.backend.service.order.UpdateOrderService;
 import com.rockstock.backend.service.payment.MidtransPaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,7 +20,6 @@ public class MidtransPaymentServiceImpl implements MidtransPaymentService {
 
     private final Config midtransConfig;
     private final OrderRepository orderRepository;
-    private final UpdateOrderService updateOrderService;
 
     @Override
     @Transactional
@@ -65,28 +63,28 @@ public class MidtransPaymentServiceImpl implements MidtransPaymentService {
         switch (transactionStatus) {
             case "settlement", "capture", "success" -> {
                 if (order.getStatus() == OrderStatusList.WAITING_FOR_PAYMENT) {
-                    System.out.println("✅ Payment successful. Updating order status to PROCESSING...");
+                    System.out.println("Payment successful. Updating order status to PROCESSING...");
                     order.setStatus(OrderStatusList.PROCESSING);
                     orderRepository.save(order); // Ensure the update is persisted
-                    System.out.println("✅ Order " + orderCode + " updated to PROCESSING in the database.");
+                    System.out.println("Order " + orderCode + " updated to PROCESSING in the database.");
                 } else {
-                    System.out.println("⚠️ Order " + orderCode + " is already processed. No update needed.");
+                    System.out.println("Order " + orderCode + " is already processed. No update needed.");
                 }
             }
             case "pending" -> {
-                System.out.println("ℹ️ Order " + orderCode + " is still pending payment. No status change.");
+                System.out.println("Order " + orderCode + " is still pending payment. No status change.");
             }
             case "deny", "cancel", "expire", "failure" -> {
-                System.out.println("❌ Payment failed. Updating order status to CANCELED...");
+                System.out.println("Payment failed. Updating order status to CANCELED...");
                 order.setStatus(OrderStatusList.CANCELED);
                 orderRepository.save(order);
-                System.out.println("✅ Order " + orderCode + " updated to CANCELED in the database.");
+                System.out.println("Order " + orderCode + " updated to CANCELED in the database.");
             }
             case "refund", "chargeback" -> {
-                System.out.println("⚠️ Order " + orderCode + " has been refunded or chargeback initiated.");
+                System.out.println("Order " + orderCode + " has been refunded or chargeback initiated.");
             }
             default -> {
-                System.out.println("⚠️ Unhandled transaction status: " + transactionStatus);
+                System.out.println("Unhandled transaction status: " + transactionStatus);
             }
         }
     }
