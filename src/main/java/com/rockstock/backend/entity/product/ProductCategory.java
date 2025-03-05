@@ -63,7 +63,7 @@ public class ProductCategory {
     }
 
     // Relationships
-//    @JsonManagedReference
-//    @OneToMany(mappedBy = "productCategory", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private Set<Product> products = new HashSet<>();
+    @JsonManagedReference
+    @OneToMany(mappedBy = "productCategory", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Product> products = new HashSet<>();
 }

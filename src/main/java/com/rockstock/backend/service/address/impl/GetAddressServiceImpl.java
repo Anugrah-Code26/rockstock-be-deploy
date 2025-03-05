@@ -2,7 +2,7 @@ package com.rockstock.backend.service.address.impl;
 
 import com.rockstock.backend.common.exceptions.DataNotFoundException;
 import com.rockstock.backend.entity.geolocation.Address;
-import com.rockstock.backend.entity.geolocation.SubDistrict;
+import com.rockstock.backend.infrastructure.address.dto.GetAddressResponseDTO;
 import com.rockstock.backend.infrastructure.address.repository.AddressRepository;
 import com.rockstock.backend.service.address.GetAddressService;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -18,133 +19,108 @@ public class GetAddressServiceImpl implements GetAddressService {
 
     private final AddressRepository addressRepository;
 
-    @Override
-    @Transactional
-    public List<Address> getAddressesByUserId(Long userId) {
-        List<Address> userAddresses = addressRepository.findByUserId(userId);
-        if (userAddresses.isEmpty()){
-            throw new DataNotFoundException("Address not found !");
-        }
-        return userAddresses;
+    private GetAddressResponseDTO mapToDTO(Address address) {
+        return new GetAddressResponseDTO(address);
     }
 
     @Override
     @Transactional
-    public List<Address> getAddressesByUserIdAndProvinceId(Long userId, Long provinceId) {
-        List<Address> addressesByProvinceId = addressRepository.findByUserIdAndProvinceId(userId, provinceId);
-        if (addressesByProvinceId.isEmpty()){
-            throw new DataNotFoundException("Address not found !");
-        }
-        return addressesByProvinceId;
+    public List<GetAddressResponseDTO> getAddressesByUserId(Long userId) {
+        List<Address> addresses = addressRepository.findByUserId(userId);
+        if (addresses.isEmpty()) throw new DataNotFoundException("Address not found!");
+        return addresses.stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public List<Address> getAddressesByUserIdAndProvinceName(Long userId, String name) {
-        List<Address> addressesByProvinceName = addressRepository.findByUserIdAndProvinceName(userId, name);
-        if (addressesByProvinceName.isEmpty()){
-            throw new DataNotFoundException("Address not found !");
-        }
-        return addressesByProvinceName;
+    public List<GetAddressResponseDTO> getAddressesByUserIdAndProvinceId(Long userId, Long provinceId) {
+        List<Address> addresses = addressRepository.findByUserIdAndProvinceId(userId, provinceId);
+        if (addresses.isEmpty()) throw new DataNotFoundException("Address not found!");
+        return addresses.stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public List<Address> getAddressesByUserIdAndCityId(Long userId, Long cityId) {
-        List<Address> addressesByCityId = addressRepository.findByUserIdAndCityId(userId, cityId);
-        if (addressesByCityId.isEmpty()){
-            throw new DataNotFoundException("Address not found !");
-        }
-        return addressesByCityId;
+    public List<GetAddressResponseDTO> getAddressesByUserIdAndProvinceName(Long userId, String name) {
+        List<Address> addresses = addressRepository.findByUserIdAndProvinceName(userId, name);
+        if (addresses.isEmpty()) throw new DataNotFoundException("Address not found!");
+        return addresses.stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public List<Address> getAddressesByUserIdAndCityName(Long userId, String name) {
-        List<Address> addressesByCityName = addressRepository.findByUserIdAndCityName(userId, name);
-        if (addressesByCityName.isEmpty()){
-            throw new DataNotFoundException("Address not found !");
-        }
-        return addressesByCityName;
+    public List<GetAddressResponseDTO> getAddressesByUserIdAndCityId(Long userId, Long cityId) {
+        List<Address> addresses = addressRepository.findByUserIdAndCityId(userId, cityId);
+        if (addresses.isEmpty()) throw new DataNotFoundException("Address not found!");
+        return addresses.stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public List<Address> getAddressesByUserIdAndDistrictId(Long userId, Long districtId) {
-        List<Address> addressesByDistrictId = addressRepository.findByUserIdAndDistrictId(userId, districtId);
-        if (addressesByDistrictId.isEmpty()){
-            throw new DataNotFoundException("Address not found !");
-        }
-        return addressesByDistrictId;
+    public List<GetAddressResponseDTO> getAddressesByUserIdAndCityName(Long userId, String name) {
+        List<Address> addresses = addressRepository.findByUserIdAndCityName(userId, name);
+        if (addresses.isEmpty()) throw new DataNotFoundException("Address not found!");
+        return addresses.stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public List<Address> getAddressesByUserIdAndDistrictName(Long userId, String name) {
-        List<Address> addressesByDistrictName = addressRepository.findByUserIdAndDistrictName(userId, name);
-        if (addressesByDistrictName.isEmpty()){
-            throw new DataNotFoundException("Address not found !");
-        }
-        return addressesByDistrictName;
+    public List<GetAddressResponseDTO> getAddressesByUserIdAndDistrictId(Long userId, Long districtId) {
+        List<Address> addresses = addressRepository.findByUserIdAndDistrictId(userId, districtId);
+        if (addresses.isEmpty()) throw new DataNotFoundException("Address not found!");
+        return addresses.stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public List<Address> getAddressesByUserIdAndSubDistrictId(Long userId, Long subDistrictId) {
-        List<Address> addressesBySubDistrictId = addressRepository.findByUserIdAndSubDistrictId(userId, subDistrictId);
-        if (addressesBySubDistrictId.isEmpty()){
-            throw new DataNotFoundException("Address not found !");
-        }
-        return addressesBySubDistrictId;
+    public List<GetAddressResponseDTO> getAddressesByUserIdAndDistrictName(Long userId, String name) {
+        List<Address> addresses = addressRepository.findByUserIdAndDistrictName(userId, name);
+        if (addresses.isEmpty()) throw new DataNotFoundException("Address not found!");
+        return addresses.stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public List<Address> getAddressesByUserIdAndSubDistrictName(Long userId, String name) {
-        List<Address> addressesBySubDistrictName = addressRepository.findByUserIdAndSubDistrictName(userId, name);
-        if (addressesBySubDistrictName.isEmpty()){
-            throw new DataNotFoundException("Address not found !");
-        }
-        return addressesBySubDistrictName;
+    public List<GetAddressResponseDTO> getAddressesByUserIdAndSubDistrictId(Long userId, Long subDistrictId) {
+        List<Address> addresses = addressRepository.findByUserIdAndSubDistrictId(userId, subDistrictId);
+        if (addresses.isEmpty()) throw new DataNotFoundException("Address not found!");
+        return addresses.stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public Optional<Address> getAddressByUserIdAndAddressId(Long userId, Long addressId) {
-        Optional<Address> userAddress = addressRepository.findByUserIdAndAddressId(userId, addressId);
-        if (userAddress.isEmpty()){
-            throw new DataNotFoundException("Address not found !");
-        }
-        return userAddress;
+    public List<GetAddressResponseDTO> getAddressesByUserIdAndSubDistrictName(Long userId, String name) {
+        List<Address> addresses = addressRepository.findByUserIdAndSubDistrictName(userId, name);
+        if (addresses.isEmpty()) throw new DataNotFoundException("Address not found!");
+        return addresses.stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public Optional<Address> getAddressByUserIdAndLabel(Long userId, String label) {
-        Optional<Address> userAddressByLabel = addressRepository.findByUserIdAndLabel(userId, label);
-        if (userAddressByLabel.isEmpty()){
-            throw new DataNotFoundException("Address not found !");
-        }
-        return userAddressByLabel;
+    public Optional<GetAddressResponseDTO> getAddressByUserIdAndAddressId(Long userId, Long addressId) {
+        return addressRepository.findByUserIdAndAddressId(userId, addressId)
+                .map(this::mapToDTO);
     }
 
     @Override
     @Transactional
-    public Optional<Address> getMainAddressByUserId(Long userId) {
-        Optional<Address> userMainAddress = addressRepository.findByUserIdAndIsMainTrue(userId);
-        if (userMainAddress.isEmpty()){
-            throw new DataNotFoundException("Main address not found ! or User still do not have any address !");
-        }
-        return userMainAddress;
+    public Optional<GetAddressResponseDTO> getAddressByUserIdAndLabel(Long userId, String label) {
+        return addressRepository.findByUserIdAndLabel(userId, label)
+                .map(this::mapToDTO);
     }
 
     @Override
     @Transactional
-    public List<Address> getAllDeletedAddressesByUserId(Long userId) {
-        List<Address> deletedAddresses = addressRepository.findAllDeletedAddressesByUserId(userId);
-        if (deletedAddresses.isEmpty()) {
-            throw new DataNotFoundException("No deleted addresses found!");
-        }
-        return deletedAddresses;
+    public Optional<GetAddressResponseDTO> getMainAddressByUserId(Long userId) {
+        return addressRepository.findByUserIdAndIsMainTrue(userId)
+                .map(this::mapToDTO);
+    }
+
+    @Override
+    @Transactional
+    public List<GetAddressResponseDTO> getAllDeletedAddressesByUserId(Long userId) {
+        List<Address> addresses = addressRepository.findAllDeletedAddressesByUserId(userId);
+        if (addresses.isEmpty()) throw new DataNotFoundException("No deleted addresses found!");
+        return addresses.stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 }

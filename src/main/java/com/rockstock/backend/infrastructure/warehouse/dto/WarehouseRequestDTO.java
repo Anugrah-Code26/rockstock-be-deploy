@@ -1,18 +1,19 @@
-package com.rockstock.backend.infrastructure.warehouse.DTO;
+package com.rockstock.backend.infrastructure.warehouse.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class WarehouseCreateRequestDTO {
+public class WarehouseRequestDTO {
 
     @NotBlank(message = "Warehouse name is required")
     private String name;
 
-    @NotBlank(message = "Location is required")
-    private String location;
+    @NotBlank
+    private String address;
 
     @NotBlank(message = "Latitude is required")
     private String latitude;
@@ -20,8 +21,6 @@ public class WarehouseCreateRequestDTO {
     @NotBlank(message = "Longitude is required")
     private String longitude;
 
-    @NotBlank(message = "Contact number is required")
-    private String contactNumber;
-
-    private Long adminId; // Admin responsible for this warehouse
+    @NotNull
+    private Long subDistrictId;
 }

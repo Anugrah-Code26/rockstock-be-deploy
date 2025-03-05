@@ -60,6 +60,10 @@ public class User {
     private String gender;
 
     @NotNull
+    @Column(name = "is_admin", nullable = false)
+    private Boolean isAdmin = false;
+
+    @NotNull
     @ColumnDefault("false")
     @Column(name = "is_verified", nullable = false)
     private Boolean isVerified = false;
@@ -94,16 +98,16 @@ public class User {
     }
 
     // Relationships
-//    @JsonBackReference
+    @JsonBackReference
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
-//    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-//    @JoinTable(name = "warehouse_admins", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "warehouse_id"))
-//    private Set<Warehouse> warehouses = new HashSet<>();
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(name = "warehouse_admins", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "warehouse_id"))
+    private Set<Warehouse> warehouses = new HashSet<>();
 
-//    @JsonBackReference
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_provider_id", referencedColumnName = "user_provider_id")
     private UserProvider userProvider;
@@ -115,21 +119,4 @@ public class User {
     @JsonManagedReference
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<WarehouseAdmin> warehouseAdmins = new HashSet<>();
-
-//    @JsonManagedReference
-//    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-//    private Set<Address> addresses = new HashSet<>();
-
-//    @JsonManagedReference
-//    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-//    private Cart cart;
-//
-//    @JsonManagedReference
-//    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-//    private Set<Order> orders = new HashSet<>();
-
-//    public Boolean isAdmin() {
-//        return roles.stream()
-//                .noneMatch(role -> role.getName().equals("Customer"));
-//    }
 }

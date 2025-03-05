@@ -55,7 +55,7 @@ public class UserProvider {
     }
 
     // Relationships
-//    @JsonManagedReference
-//    @OneToMany(mappedBy = "userProvider", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-//    private Set<User> users = new HashSet<>();
+    @JsonManagedReference
+    @OneToMany(mappedBy = "userProvider", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<User> users = new HashSet<>();
 }

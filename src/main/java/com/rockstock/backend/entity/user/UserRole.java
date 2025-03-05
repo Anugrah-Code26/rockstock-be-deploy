@@ -56,7 +56,7 @@ public class UserRole {
     @JoinColumn(name = "user_id", referencedColumnName = "user_id")
     private User user;
 
-//    @JsonBackReference
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "role_id", referencedColumnName = "role_id")
     private Role role;

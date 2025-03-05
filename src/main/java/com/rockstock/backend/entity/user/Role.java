@@ -55,8 +55,8 @@ public class Role {
     }
 
     // Relationships
-//    @JsonManagedReference
-//    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-//    private Set<UserRole> userRoles = new HashSet<>();
+    @JsonManagedReference
+    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<UserRole> userRoles = new HashSet<>();
 
 }

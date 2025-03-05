@@ -97,12 +97,4 @@ public class Product {
     @JsonManagedReference
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<WarehouseStock> stocks = new HashSet<>();
-
-//    @JsonManagedReference
-//    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private Set<OrderItem> orderItems = new HashSet<>();
-
-//    @JsonManagedReference
-//    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private Set<CartItem> cartItems = new HashSet<>();
 }

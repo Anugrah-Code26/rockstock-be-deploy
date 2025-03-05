@@ -1,6 +1,5 @@
 package com.rockstock.backend.entity.stock;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.rockstock.backend.entity.warehouse.Warehouse;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -23,9 +22,9 @@ public class MutationJournal {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "mutation_journal_id_gen")
     @SequenceGenerator(name = "mutation_journal_id_gen", sequenceName = "mutation_journal_id_seq", schema = "rockstock", allocationSize = 1)
     @Column(name = "mutation_journal_id", nullable = false)
-    private Long id;
+    private Long Id;
 
-    @Column(nullable = false)
+    @Column(name = "mutation_quantity", nullable = false)
     private Long mutationQuantity;
 
     @Column(name = "previous_stock_quantity", nullable = false)
@@ -35,14 +34,6 @@ public class MutationJournal {
     private Long newStockQuantity;
 
     private String description;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "mutation_status", nullable = false)
-    private MutationStatus mutationStatus;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "stock_change_type", nullable = false)
-    private StockChangeType stockChangeType;
 
     @Column(name = "created_at", nullable = false)
     @ColumnDefault("CURRENT_TIMESTAMP")
@@ -64,17 +55,23 @@ public class MutationJournal {
     }
 
     // Relationships
-    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "warehouse_stock_id", nullable = false)
     private WarehouseStock warehouseStock;
 
-    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "origin_warehouse_id")
     private Warehouse originWarehouse;
 
-    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "destination_warehouse_id")
-    private Warehouse destinationWarehouse;}
+    private Warehouse destinationWarehouse;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "stock_change_type", nullable = false)
+    private StockChangeType stockChangeType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "mutation_status", nullable = false)
+    private MutationStatus mutationStatus;
+}

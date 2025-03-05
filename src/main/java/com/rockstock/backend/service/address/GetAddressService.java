@@ -1,23 +1,22 @@
 package com.rockstock.backend.service.address;
 
-import com.rockstock.backend.entity.geolocation.Address;
-import com.rockstock.backend.entity.geolocation.SubDistrict;
+import com.rockstock.backend.infrastructure.address.dto.GetAddressResponseDTO;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface GetAddressService {
-    List<Address> getAddressesByUserId(Long userId);
-    List<Address> getAddressesByUserIdAndProvinceId(Long userId, Long provinceId);
-    List<Address> getAddressesByUserIdAndProvinceName(Long userId, String name);
-    List<Address> getAddressesByUserIdAndCityId(Long userId, Long cityId);
-    List<Address> getAddressesByUserIdAndCityName(Long userId, String name);
-    List<Address> getAddressesByUserIdAndDistrictId(Long userId, Long districtId);
-    List<Address> getAddressesByUserIdAndDistrictName(Long userId, String name);
-    List<Address> getAddressesByUserIdAndSubDistrictId(Long userId, Long subDistrictId);
-    List<Address> getAddressesByUserIdAndSubDistrictName(Long userId, String name);
-    Optional<Address> getAddressByUserIdAndAddressId(Long userId, Long addressId);
-    Optional<Address> getAddressByUserIdAndLabel(Long userId, String label);
-    Optional<Address> getMainAddressByUserId(Long userId);
-    List<Address> getAllDeletedAddressesByUserId(Long userId);
+    List<GetAddressResponseDTO> getAddressesByUserId(Long userId);
+    List<GetAddressResponseDTO> getAddressesByUserIdAndProvinceId(Long userId, Long provinceId);
+    List<GetAddressResponseDTO> getAddressesByUserIdAndProvinceName(Long userId, String name);
+    List<GetAddressResponseDTO> getAddressesByUserIdAndCityId(Long userId, Long cityId);
+    List<GetAddressResponseDTO> getAddressesByUserIdAndCityName(Long userId, String name);
+    List<GetAddressResponseDTO> getAddressesByUserIdAndDistrictId(Long userId, Long districtId);
+    List<GetAddressResponseDTO> getAddressesByUserIdAndDistrictName(Long userId, String name);
+    List<GetAddressResponseDTO> getAddressesByUserIdAndSubDistrictId(Long userId, Long subDistrictId);
+    List<GetAddressResponseDTO> getAddressesByUserIdAndSubDistrictName(Long userId, String name);
+    Optional<GetAddressResponseDTO> getAddressByUserIdAndAddressId(Long userId, Long addressId);
+    Optional<GetAddressResponseDTO> getAddressByUserIdAndLabel(Long userId, String label);
+    Optional<GetAddressResponseDTO> getMainAddressByUserId(Long userId);
+    List<GetAddressResponseDTO> getAllDeletedAddressesByUserId(Long userId);
 }

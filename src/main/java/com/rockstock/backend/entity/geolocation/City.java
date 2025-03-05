@@ -60,8 +60,4 @@ public class City {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "province_id", nullable = false)
     private Province province;
-
-//    @JsonManagedReference
-//    @OneToMany(mappedBy = "city", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-//    private Set<District> districts = new HashSet<>();
 }

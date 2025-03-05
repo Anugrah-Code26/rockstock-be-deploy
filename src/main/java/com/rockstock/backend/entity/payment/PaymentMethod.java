@@ -61,9 +61,4 @@ public class PaymentMethod {
     protected void onRemove() {
         deletedAt = OffsetDateTime.now();
     }
-
-    // Relationships
-//    @JsonManagedReference
-//    @OneToMany(mappedBy = "paymentMethod", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-//    private Set<Order> orders = new HashSet<>();
 }

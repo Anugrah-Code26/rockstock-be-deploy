@@ -18,9 +18,14 @@ public class GetAddressResponseDTO {
     private Boolean isMain;
     private Long userId;
     private Long subDistrictId;
+    private String subDistrictName;
+    private String addressPostalCode;
     private Long districtId;
+    private String districtName;
     private Long cityId;
+    private String cityName;
     private Long provinceId;
+    private String provinceName;
 
     public GetAddressResponseDTO(Address address) {
         this.addressId = address.getId();
@@ -32,8 +37,13 @@ public class GetAddressResponseDTO {
         this.isMain = address.getIsMain();
         this.userId = address.getUser().getId();
         this.subDistrictId = address.getSubDistrict().getId();
+        this.subDistrictName = address.getSubDistrict().getName();
+        this.addressPostalCode = address.getSubDistrict().getPostalCode();
         this.districtId = address.getSubDistrict().getDistrict().getId();
+        this.districtName = address.getSubDistrict().getDistrict().getName();
         this.cityId = address.getSubDistrict().getDistrict().getCity().getId();
+        this.cityName = address.getSubDistrict().getDistrict().getCity().getName();
         this.provinceId = address.getSubDistrict().getDistrict().getCity().getProvince().getId();
+        this.provinceName = address.getSubDistrict().getDistrict().getCity().getProvince().getName();
     }
 }

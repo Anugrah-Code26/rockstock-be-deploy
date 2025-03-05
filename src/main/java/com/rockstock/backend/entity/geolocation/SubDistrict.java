@@ -64,8 +64,4 @@ public class SubDistrict {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "district_id", nullable = false)
     private District district;
-
-//    @JsonManagedReference
-//    @OneToMany(mappedBy = "subDistrict", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-//    private Set<Address> addresses = new HashSet<>();
 }

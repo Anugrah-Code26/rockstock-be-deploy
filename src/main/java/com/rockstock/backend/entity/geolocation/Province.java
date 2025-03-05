@@ -53,9 +53,4 @@ public class Province {
     protected void onUpdate() {
         updatedAt = OffsetDateTime.now();
     }
-
-    // Relationships
-//    @JsonManagedReference
-//    @OneToMany(mappedBy = "province", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-//    private Set<City> cities = new HashSet<>();
 }
