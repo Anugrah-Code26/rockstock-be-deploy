@@ -1,8 +1,9 @@
 package com.rockstock.backend.infrastructure.address.dto;
 
 import com.rockstock.backend.entity.geolocation.Address;
-import jakarta.validation.constraints.NotBlank;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor

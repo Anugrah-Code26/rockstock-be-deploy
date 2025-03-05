@@ -17,7 +17,7 @@ public class LogoutServiceImpl implements LogoutService {
 
     public LogoutServiceImpl(
             JwtDecoder jwtDecoder,
-            com.rockstock.backend.service.user.auth.TokenBlacklistService tokenBlacklistService
+            TokenBlacklistService tokenBlacklistService
     ) {
         this.jwtDecoder = jwtDecoder;
         this.tokenBlacklistService = tokenBlacklistService;

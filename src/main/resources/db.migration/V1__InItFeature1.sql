@@ -1,0 +1,162 @@
+---- Creating Users Table
+--CREATE TABLE users (
+--    user_id SERIAL PRIMARY KEY,
+--    fullname VARCHAR(255) NOT NULL,
+--    email VARCHAR(255) NOT NULL UNIQUE,
+--    password VARCHAR(255) NOT NULL,
+--    birth_date DATE,
+--    gender VARCHAR(10),
+--    profile_picture_url VARCHAR(255),
+--    is_verified BOOLEAN DEFAULT FALSE,
+--    is_admin BOOLEAN DEFAULT FALSE,
+--    deleted_at TIMESTAMPTZ,
+--    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+--    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+--);
+--
+---- Creating User Providers Table
+--CREATE TABLE user_providers (
+--    user_provider_id SERIAL PRIMARY KEY,
+--    provider VARCHAR(255) NOT NULL UNIQUE,
+--    deleted_at TIMESTAMPTZ,
+--    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+--    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+--);
+--
+---- Creating Roles Table
+--CREATE TABLE roles (
+--    role_id SERIAL PRIMARY KEY,
+--    name VARCHAR(255) NOT NULL UNIQUE,
+--    deleted_at TIMESTAMPTZ,
+--    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+--    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+--);
+--
+---- Creating User Roles Table
+--CREATE TABLE user_roles (
+--    user_role_id SERIAL PRIMARY KEY,
+--    deleted_at TIMESTAMPTZ,
+--    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+--    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+--);
+--
+---- Creating Provinces Table
+--CREATE TABLE provinces (
+--    province_id SERIAL PRIMARY KEY,
+--    name VARCHAR(100) NOT NULL,
+--    deleted_at TIMESTAMPTZ,
+--    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+--    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+--);
+--
+---- Creating Cities Table
+--CREATE TABLE cities (
+--    city_id SERIAL PRIMARY KEY,
+--    name VARCHAR(100) NOT NULL,
+--    type VARCHAR(10) CHECK (type IN ('Kota', 'Kabupaten')),
+--    deleted_at TIMESTAMPTZ,
+--    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+--    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+--);
+--
+---- Creating Addresses Table
+--CREATE TABLE addresses (
+--    address_id SERIAL PRIMARY KEY,
+--    label VARCHAR(255) NOT NULL,
+--    address_detail VARCHAR(255) NOT NULL,
+--    longtitude VARCHAR(255) NOT NULL,
+--    latitude VARCHAR(255) NOT NULL,
+--    note VARCHAR(255),
+--    is_main BOOLEAN DEFAULT FALSE,
+--    deleted_at TIMESTAMPTZ,
+--    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+--    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+--);
+--
+---- Creating Warehouses Table
+--CREATE TABLE warehouses (
+--    warehouse_id SERIAL PRIMARY KEY,
+--    name VARCHAR(255) NOT NULL,
+--    address VARCHAR(255) NOT NULL,
+----    longtitude VARCHAR(255) NOT NULL,
+----    latitude VARCHAR(255) NOT NULL,
+--    deleted_at TIMESTAMPTZ,
+--    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+--    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+--);
+--
+---- Creating Warehouse Admins Table
+--CREATE TABLE warehouse_admins (
+--    warehouse_admin_id SERIAL PRIMARY KEY,
+--    deleted_at TIMESTAMPTZ,
+--    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+--    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+--);
+--
+---- Creating Carts Table
+--CREATE TABLE carts (
+--    cart_id SERIAL PRIMARY KEY,
+--    is_active BOOLEAN DEFAULT TRUE,
+--    deleted_at TIMESTAMPTZ,
+--    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+--    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+--);
+--
+---- Creating Cart Items Table
+--CREATE TABLE cart_items (
+--    cart_item_id SERIAL PRIMARY KEY,
+--    quantity NUMERIC(10, 0) NOT NULL CHECK (quantity > 0),
+--    total_amount NUMERIC(10, 0) NOT NULL,
+--    deleted_at TIMESTAMPTZ,
+--    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+--    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+--);
+--
+---- Creating Payment_Categories Table
+--CREATE TABLE payment_categories (
+--    payment_category_id SERIAL PRIMARY KEY,
+--    payment_category VARCHAR(50) NOT NULL,
+--    deleted_at TIMESTAMPTZ,
+--    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+--    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+--);
+--
+---- Creating Order Statuses Table
+--CREATE TABLE order_statuses (
+--    order_status_id SERIAL PRIMARY KEY,
+--    status VARCHAR(255) NOT NULL,
+--    detail VARCHAR(255) NOT NULL,
+--    deleted_at TIMESTAMPTZ,
+--    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+--    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+--);
+--
+---- Creating Payment_Methods Table
+--CREATE TABLE payment_methods (
+--    payment_method_id SERIAL PRIMARY KEY,
+--    payment_method VARCHAR(50) NOT NULL,
+--    deleted_at TIMESTAMPTZ,
+--    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+--    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+--);
+--
+---- Creating Orders Table
+--CREATE TABLE orders (
+--    order_id SERIAL PRIMARY KEY,
+--    payment_proof VARCHAR(255),
+--    delivery_cost NUMERIC(10, 0) NOT NULL,
+--    total_price NUMERIC(10, 0) NOT NULL,
+--    deleted_at TIMESTAMPTZ,
+--    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+--    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+--);
+--
+---- Creating Order Items Table (for log)
+--CREATE TABLE order_items (
+--    order_item_id SERIAL PRIMARY KEY,
+--    quantity NUMERIC(10, 0) NOT NULL CHECK (quantity > 0),
+--    price NUMERIC(10, 0) NOT NULL,
+--    deleted_at TIMESTAMPTZ,
+--    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+--    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+--);

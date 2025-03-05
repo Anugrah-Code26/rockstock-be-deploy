@@ -46,11 +46,15 @@ public class User {
     private String email;
 
     @Size(min = 6, message = "Password must be at least 6 characters")
-    @Column
+    @Column(nullable = false)
     private String password;
 
     @Column(name = "profile_picture_url")
     private String photoProfileUrl;
+
+    @Column(name = "google_image_url")
+    private String googleImageUrl;
+
 
     @Column(name = "birth_date")
     private OffsetDateTime birthDate;
@@ -97,19 +101,25 @@ public class User {
         deletedAt = OffsetDateTime.now();
     }
 
+    @NotNull
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
+
+
     // Relationships
     @JsonBackReference
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
+    @JsonBackReference
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "warehouse_admins", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "warehouse_id"))
     private Set<Warehouse> warehouses = new HashSet<>();
 
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_provider_id", referencedColumnName = "user_provider_id")
+    @JoinColumn(name = "user_provider_id", referencedColumnName = "user_provider_id", nullable = true)
     private UserProvider userProvider;
 
     @JsonManagedReference
@@ -118,5 +128,18 @@ public class User {
 
     @JsonManagedReference
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<Address> addresses = new HashSet<>();
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<WarehouseAdmin> warehouseAdmins = new HashSet<>();
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<Cart> carts = new HashSet<>();
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<Order> orders = new HashSet<>();
+
 }

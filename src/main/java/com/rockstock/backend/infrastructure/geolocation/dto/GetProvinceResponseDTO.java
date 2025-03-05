@@ -1,6 +1,5 @@
 package com.rockstock.backend.infrastructure.geolocation.dto;
 
-import com.rockstock.backend.entity.geolocation.City;
 import com.rockstock.backend.entity.geolocation.Province;
 import lombok.AllArgsConstructor;
 import lombok.Data;

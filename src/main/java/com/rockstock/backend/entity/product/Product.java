@@ -49,7 +49,7 @@ public class Product {
 
     @NotNull
     @Column(name = "total_stock", nullable = false, precision = 10)
-    private BigDecimal totalStock;
+    private BigDecimal totalStock= BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -96,5 +96,13 @@ public class Product {
 
     @JsonManagedReference
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<WarehouseStock> stocks = new HashSet<>();
+    private Set<WarehouseStock> warehouseStocks = new HashSet<>();
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<CartItem> cartItems = new HashSet<>();
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<OrderItem> orderItems = new HashSet<>();
 }

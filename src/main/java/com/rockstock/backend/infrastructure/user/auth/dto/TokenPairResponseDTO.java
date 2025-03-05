@@ -11,4 +11,5 @@ public class TokenPairResponseDTO {
     private String accessToken;
     private String refreshToken;
     private String tokenType = "Bearer";
+    private String fullname;
 }

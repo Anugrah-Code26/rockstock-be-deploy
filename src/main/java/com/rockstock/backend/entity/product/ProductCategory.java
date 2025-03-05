@@ -24,10 +24,10 @@ public class ProductCategory {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "product_category_id_gen")
     @SequenceGenerator(name = "product_category_id_gen", sequenceName = "product_category_id_seq", allocationSize = 1)
     @Column(name = "product_category_id", nullable = false)
-    private Long id;
+    private Long Id;
 
     @NotNull
-    @Column(nullable = false)
+    @Column(name = "category_name", nullable = false)
     private String categoryName;
 
     @Column(name = "category_picture")

@@ -40,12 +40,12 @@ public class GetProductService {
 
     public Page<GetAllProductResponseDTO> getAllProducts(int page, int size, String name, String category, String sortField, String sortDirection) {
         if (StringUtils.isBlank(sortField)) {
-            sortField = "createdAt";
+            sortField = "updatedAt";
         }
 
         sortDirection = (StringUtils.equalsIgnoreCase(sortDirection, "DESC")) ? "DESC" : "ASC";
 
-        List<String> allowedSortFields = Arrays.asList("createdAt", "productName", "price", "category");
+        List<String> allowedSortFields = Arrays.asList("updatedAt", "productName", "price", "category");
         if (!allowedSortFields.contains(sortField)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid sort field: " + sortField);
         }
@@ -74,3 +74,4 @@ public class GetProductService {
         });
     }
 }
+

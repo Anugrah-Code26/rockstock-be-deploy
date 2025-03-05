@@ -1,7 +1,6 @@
 package com.rockstock.backend.infrastructure.product.specification;
 
 import com.rockstock.backend.entity.product.Product;
-//import com.rockstock.backend.entity.product.ProductStatus;
 import com.rockstock.backend.entity.product.ProductStatus;
 import org.springframework.data.jpa.domain.Specification;
 

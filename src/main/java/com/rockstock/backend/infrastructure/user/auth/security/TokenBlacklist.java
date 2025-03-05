@@ -1,16 +1,15 @@
 package com.rockstock.backend.infrastructure.user.auth.security;
 
-import java.io.IOException;
-
 import com.rockstock.backend.service.user.auth.TokenBlacklistService;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 @Component
 public class TokenBlacklist extends OncePerRequestFilter {

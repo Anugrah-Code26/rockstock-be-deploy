@@ -1,9 +1,7 @@
 package com.rockstock.backend.service.geolocation.impl;
 
 import com.rockstock.backend.common.exceptions.DataNotFoundException;
-import com.rockstock.backend.entity.geolocation.City;
 import com.rockstock.backend.entity.geolocation.Province;
-import com.rockstock.backend.infrastructure.geolocation.dto.GetCityResponseDTO;
 import com.rockstock.backend.infrastructure.geolocation.dto.GetProvinceResponseDTO;
 import com.rockstock.backend.infrastructure.geolocation.repository.ProvinceRepository;
 import com.rockstock.backend.service.geolocation.GetProvinceService;

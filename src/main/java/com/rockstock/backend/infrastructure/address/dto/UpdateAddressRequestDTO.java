@@ -1,6 +1,8 @@
 package com.rockstock.backend.infrastructure.address.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor

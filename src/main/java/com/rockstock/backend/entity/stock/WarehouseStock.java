@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+//@EntityListeners(WarehouseStockListener.class)
 @Table(name = "warehouse_stocks", schema = "rockstock")
 @Getter
 @Setter
@@ -27,7 +28,7 @@ public class WarehouseStock {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "warehouse_stock_id_gen")
     @SequenceGenerator(name = "warehouse_stock_id_gen", sequenceName = "warehouse_stock_id_seq", schema = "rockstock", allocationSize = 1)
     @Column(name = "warehouse_stock_id", nullable = false)
-    private Long id;
+    private Long Id;
 
     @Column(nullable = false)
     private Long stockQuantity;
