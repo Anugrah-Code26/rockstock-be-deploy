@@ -1,5 +1,6 @@
 package com.rockstock.backend.service.address;
 
+import com.rockstock.backend.entity.geolocation.Address;
 import com.rockstock.backend.infrastructure.address.dto.GetAddressResponseDTO;
 
 import java.util.List;
@@ -19,4 +20,8 @@ public interface GetAddressService {
     Optional<GetAddressResponseDTO> getAddressByUserIdAndLabel(Long userId, String label);
     Optional<GetAddressResponseDTO> getMainAddressByUserId(Long userId);
     List<GetAddressResponseDTO> getAllDeletedAddressesByUserId(Long userId);
+
+    List<Address> getUserAddresses(Long userId);
+    Optional<Address> getUserAddressesByAddressId(Long userId, Long addressId);
+    Optional<Address> getUserMainAddresses(Long userId, boolean isMain);
 }

@@ -45,6 +45,9 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
     @Query("SELECT a FROM Address a WHERE a.user.id = :userId AND a.isMain = true AND a.deletedAt IS NULL")
     Optional<Address> findByUserIdAndIsMainTrue(Long userId);
 
+    @Query("SELECT a FROM Address a WHERE a.user.id = :userId AND a.isMain = true AND a.deletedAt IS NULL")
+    Optional<Address> findByMainAddressUser(Long userId, boolean isMain);
+
     @Query("SELECT a FROM Address a WHERE a.user.id = :userId AND LOWER(TRIM(a.label)) = LOWER(TRIM(:label)) AND a.deletedAt IS NULL")
     Optional<Address> findByUserIdAndLabel(Long userId, String label);
 

@@ -32,6 +32,9 @@ public class CreateAddressRequestDTO {
     private Boolean isMain = false;
 
     @NotNull
+    private Long userId;
+
+    @NotNull
     private Long subDistrictId;
 
     public Address toEntity(User user, SubDistrict subDistrict) {

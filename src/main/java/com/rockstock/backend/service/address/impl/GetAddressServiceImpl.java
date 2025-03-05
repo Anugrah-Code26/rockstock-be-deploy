@@ -25,6 +25,36 @@ public class GetAddressServiceImpl implements GetAddressService {
 
     @Override
     @Transactional
+    public List<Address> getUserAddresses(Long userId) {
+        List<Address> userAddresses = addressRepository.findByUserId(userId);
+        if (userAddresses.isEmpty()){
+            throw new DataNotFoundException("Address not found !");
+        }
+        return userAddresses;
+    }
+
+    @Override
+    @Transactional
+    public Optional<Address> getUserAddressesByAddressId(Long userId, Long addressId) {
+        Optional<Address> userAddress = addressRepository.findByUserIdAndAddressId(userId, addressId);
+        if (userAddress.isEmpty()){
+            throw new DataNotFoundException("Address not found !");
+        }
+        return userAddress;
+    }
+
+    @Override
+    @Transactional
+    public Optional<Address> getUserMainAddresses(Long userId, boolean isMain) {
+        Optional<Address> userMainAddress = addressRepository.findByMainAddressUser(userId, true);
+        if (userMainAddress.isEmpty()){
+            throw new DataNotFoundException("Main address not found ! or User still do not have any address !");
+        }
+        return userMainAddress;
+    }
+
+    @Override
+    @Transactional
     public List<GetAddressResponseDTO> getAddressesByUserId(Long userId) {
         List<Address> addresses = addressRepository.findByUserId(userId);
         if (addresses.isEmpty()) throw new DataNotFoundException("Address not found!");

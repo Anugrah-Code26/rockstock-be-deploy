@@ -54,7 +54,6 @@ public class WarehouseAdminServiceImpl implements WarehouseAdminService {
                 .collect(Collectors.toList());
     }
 
-
     @Transactional
     @Override
     public void removeWarehouseAdmin(Long warehouseAdminId) {

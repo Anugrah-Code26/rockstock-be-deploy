@@ -2,10 +2,12 @@ package com.rockstock.backend.service.address.impl;
 
 import com.rockstock.backend.entity.geolocation.Address;
 import com.rockstock.backend.entity.geolocation.City;
+import com.rockstock.backend.entity.geolocation.SubDistrict;
 import com.rockstock.backend.entity.user.User;
 import com.rockstock.backend.infrastructure.address.dto.CreateAddressRequestDTO;
 import com.rockstock.backend.infrastructure.address.repository.AddressRepository;
 import com.rockstock.backend.infrastructure.geolocation.repository.CityRepository;
+import com.rockstock.backend.infrastructure.geolocation.repository.SubDistrictRepository;
 import com.rockstock.backend.infrastructure.user.repository.UserRepository;
 import com.rockstock.backend.service.address.CreateAddressService;
 import com.sun.jdi.request.DuplicateRequestException;
@@ -23,14 +25,18 @@ public class CreateAddressServiceImpl implements CreateAddressService {
     private final AddressRepository addressRepository;
     private final UserRepository userRepository;
     private final CityRepository cityRepository;
+    private final SubDistrictRepository subDistrictRepository;
 
     public CreateAddressServiceImpl(
             AddressRepository addressRepository,
             UserRepository userRepository,
-            CityRepository cityRepository) {
+            CityRepository cityRepository,
+            SubDistrictRepository subDistrictRepository
+    ) {
         this.addressRepository = addressRepository;
         this.userRepository = userRepository;
         this.cityRepository = cityRepository;
+        this.subDistrictRepository = subDistrictRepository;
     }
 
     @Override
@@ -44,12 +50,12 @@ public class CreateAddressServiceImpl implements CreateAddressService {
         User user = userRepository.findById(req.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        City city = cityRepository.findById(req.getCityId())
-                .orElseThrow(() -> new RuntimeException("City not found"));
+        SubDistrict subDistrict = subDistrictRepository.findById(req.getSubDistrictId())
+                .orElseThrow(() -> new RuntimeException("Sub-District not found"));
 
         Address newAddress = new Address();
         newAddress.setUser(user);
-        newAddress.setCity(city);
+        newAddress.setSubDistrict(subDistrict);
         newAddress.setLabel(req.getLabel());
         newAddress.setAddressDetail(req.getAddressDetail());
         newAddress.setLongitude(req.getLongitude());

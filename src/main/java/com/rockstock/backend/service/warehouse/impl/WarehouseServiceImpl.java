@@ -1,15 +1,15 @@
 package com.rockstock.backend.service.warehouse.impl;
 
+import com.rockstock.backend.common.exceptions.DataNotFoundException;
 import com.rockstock.backend.entity.geolocation.SubDistrict;
 import com.rockstock.backend.entity.warehouse.Warehouse;
-import com.rockstock.backend.infrastructure.user.auth.security.Claims;
+import com.rockstock.backend.infrastructure.geolocation.repository.SubDistrictRepository;
 import com.rockstock.backend.infrastructure.warehouse.dto.WarehouseRequestDTO;
 import com.rockstock.backend.infrastructure.warehouse.dto.WarehouseResponseDTO;
 import com.rockstock.backend.infrastructure.warehouse.repository.WarehouseRepository;
 import com.rockstock.backend.service.warehouse.WarehouseService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 public class WarehouseServiceImpl implements WarehouseService {
 
     private final WarehouseRepository warehouseRepository;
+    private final SubDistrictRepository subDistrictRepository;
 
     @Override
     public WarehouseResponseDTO createWarehouse(WarehouseRequestDTO request) {
@@ -28,8 +29,9 @@ public class WarehouseServiceImpl implements WarehouseService {
         warehouse.setLongitude(request.getLongitude());
         warehouse.setLatitude(request.getLatitude());
 
-        SubDistrict subDistrict = new SubDistrict();
-        subDistrict.setId(request.getSubDistrictId());
+        SubDistrict subDistrict = subDistrictRepository.findById(request.getSubDistrictId())
+                .orElseThrow(() -> new DataNotFoundException("Sub-District not found"));
+
         warehouse.setSubDistrict(subDistrict);
 
         Warehouse savedWarehouse = warehouseRepository.save(warehouse);
