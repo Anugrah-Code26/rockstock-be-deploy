@@ -7,7 +7,7 @@ import com.rockstock.backend.infrastructure.cart.repository.CartRepository;
 import com.rockstock.backend.infrastructure.user.auth.security.Claims;
 import com.rockstock.backend.infrastructure.user.repository.UserRepository;
 import com.rockstock.backend.service.cart.CreateCartService;
-import com.sun.jdi.request.DuplicateRequestException;
+import com.rockstock.backend.common.exceptions.DuplicateDataException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +30,7 @@ public class CreateCartServiceImpl implements CreateCartService {
 
         Cart checkActiveCart = cartRepository.findActiveCartByUserId(userId);
         if (checkActiveCart != null) {
-            throw new DuplicateRequestException("Active cart is already exist !");
+            throw new DuplicateDataException("Active cart is already exist !");
         }
 
         Cart newCart = new Cart();

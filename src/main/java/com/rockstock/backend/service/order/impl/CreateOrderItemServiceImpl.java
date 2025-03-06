@@ -14,7 +14,7 @@ import com.rockstock.backend.infrastructure.order.repository.OrderRepository;
 import com.rockstock.backend.infrastructure.product.repository.ProductRepository;
 import com.rockstock.backend.infrastructure.user.auth.security.Claims;
 import com.rockstock.backend.service.order.CreateOrderItemService;
-import com.sun.jdi.request.DuplicateRequestException;
+import com.rockstock.backend.common.exceptions.DuplicateDataException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,7 +60,7 @@ public class CreateOrderItemServiceImpl implements CreateOrderItemService {
 
             Optional<OrderItem> checkOrderItem = orderItemRepository.findByOrderIdAndProductId(order.getId(), product.getId());
             if (checkOrderItem.isPresent()) {
-                throw new DuplicateRequestException("Order item is already exist !");
+                throw new DuplicateDataException("Order item is already exist !");
             }
 
             OrderItem orderItem = new OrderItem();

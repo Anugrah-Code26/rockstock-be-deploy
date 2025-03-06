@@ -5,6 +5,7 @@ import com.rockstock.backend.infrastructure.address.dto.CreateAddressRequestDTO;
 import com.rockstock.backend.infrastructure.address.dto.UpdateAddressRequestDTO;
 import com.rockstock.backend.infrastructure.user.auth.security.Claims;
 import com.rockstock.backend.service.address.*;
+import com.rockstock.backend.service.address.impl.CreateAddressServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/addresses")
 public class AddressController {
 
-    private final CreateAddressService createAddressService;
+    private final CreateAddressServiceImpl createAddressService;
     private final GetAddressService getAddressService;
     private final UpdateAddressService updateAddressService;
     private final DeleteAddressService deleteAddressService;

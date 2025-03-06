@@ -7,7 +7,7 @@ import com.rockstock.backend.infrastructure.user.auth.dto.CreateUserRequestDTO;
 import com.rockstock.backend.infrastructure.user.repository.RoleRepository;
 import com.rockstock.backend.infrastructure.user.repository.UserRepository;
 import com.rockstock.backend.service.user.auth.EmailVerificationService;
-import com.sun.jdi.request.DuplicateRequestException;
+import com.rockstock.backend.common.exceptions.DuplicateDataException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,7 +39,7 @@ public class CreateUserServiceImpl implements CreateUserService {
     public User createUser(CreateUserRequestDTO req) {
         Optional<User> checkUser = userRepository.findByEmailContainsIgnoreCase(req.getEmail());
         if (checkUser.isPresent()) {
-            throw new DuplicateRequestException("Email already exists");
+            throw new DuplicateDataException("Email already exists");
         }
 
         // Create user entity without password
