@@ -22,6 +22,7 @@ public class GetCartItemResponseDTO {
     private Long productId;
     private String productName;
     private BigDecimal productPrice;
+    private BigDecimal productWeight;
     private GetProductPicturesResponseDTO productPictures;
 
     public GetCartItemResponseDTO(CartItem cartItem) {
@@ -33,6 +34,7 @@ public class GetCartItemResponseDTO {
         this.productId = cartItem.getProduct().getId();
         this.productName = cartItem.getProduct().getProductName();
         this.productPrice = cartItem.getProduct().getPrice();
+        this.productWeight = cartItem.getProduct().getWeight();
         this.productPictures = cartItem.getProduct().getProductPictures().stream()
                 .filter(picture -> picture.getPosition() == 1)
                 .findFirst()
