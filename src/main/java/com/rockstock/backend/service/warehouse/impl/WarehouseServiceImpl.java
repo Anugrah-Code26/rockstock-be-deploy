@@ -4,12 +4,14 @@ import com.rockstock.backend.common.exceptions.DataNotFoundException;
 import com.rockstock.backend.entity.geolocation.SubDistrict;
 import com.rockstock.backend.entity.warehouse.Warehouse;
 import com.rockstock.backend.infrastructure.geolocation.repository.SubDistrictRepository;
+import com.rockstock.backend.infrastructure.user.auth.security.Claims;
 import com.rockstock.backend.infrastructure.warehouse.dto.WarehouseRequestDTO;
 import com.rockstock.backend.infrastructure.warehouse.dto.WarehouseResponseDTO;
 import com.rockstock.backend.infrastructure.warehouse.repository.WarehouseRepository;
 import com.rockstock.backend.service.warehouse.WarehouseService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,6 +43,21 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     public List<WarehouseResponseDTO> getAllWarehouses() {
         return warehouseRepository.findAll().stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<WarehouseResponseDTO> getWarehousesByWarehouseAdmin() {
+        List<Long> warehouseIds = Claims.getWarehouseIdsFromJwt();
+
+        if (warehouseIds.isEmpty()) {
+            throw new AuthorizationDeniedException("User is not associated with any warehouses");
+        }
+
+        List<Warehouse> warehouses = warehouseRepository.findByIds(warehouseIds);
+
+        return warehouses.stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }

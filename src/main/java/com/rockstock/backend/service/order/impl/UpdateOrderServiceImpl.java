@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.cloudinary.utils.ObjectUtils;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,31 +27,37 @@ public class UpdateOrderServiceImpl implements UpdateOrderService {
     private final DeleteCloudinaryService deleteCloudinaryService;
 
     @Transactional
-    public Order updateOrderStatus(OrderStatusList newStatus, Long orderId, UpdateOrderRequestDTO req) {
+    public Order updateOrderStatus(OrderStatusList newStatus, Long orderId, String orderCode, UpdateOrderRequestDTO req) {
         String userRole = Claims.getRoleFromJwt();
         System.out.println(userRole);
 
+        Optional<Order> order = (orderId != null)
+                ? orderRepository.findById(orderId)
+                : orderRepository.findByOrderCode(orderCode);
 
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new DataNotFoundException("Order not found"));
+        if (order.isEmpty()) {
+            throw new DataNotFoundException("Order not found!");
+        }
 
-        OrderStatusList status = order.getStatus();
+        Order foundOrder = order.get();
+
+        OrderStatusList status = foundOrder.getStatus();
 
         assert userRole != null;
         switch (status) {
             case WAITING_FOR_PAYMENT -> {
                 if (newStatus == OrderStatusList.CANCELED) {
                     if (userRole.equals("Customer")) {
-                        order.setStatus(newStatus);
+                        foundOrder.setStatus(newStatus);
                     } else {
                         throw new IllegalStateException("Unauthorized to cancel order");
                     }
                 } else if (newStatus == OrderStatusList.PAYMENT_VERIFICATION) {
-                    if (order.getPaymentMethod().getName().equals("Manual Bank Transfer") && req.getPaymentProof() != null) {
+                    if (foundOrder.getPaymentMethod().getName().equals("Manual Bank Transfer") && req.getPaymentProof() != null) {
                         try {
                             String imageUrl = uploadToCloudinary(req.getPaymentProof());
-                            order.setPaymentProof(imageUrl);
-                            order.setStatus(newStatus);
+                            foundOrder.setPaymentProof(imageUrl);
+                            foundOrder.setStatus(newStatus);
                         } catch (IOException e) {
                             throw new RuntimeException("Error uploading file to Cloudinary", e);
                         }
@@ -58,8 +65,8 @@ public class UpdateOrderServiceImpl implements UpdateOrderService {
                         throw new IllegalArgumentException("Payment proof required for manual bank transfer");
                     }
                 } else if (newStatus == OrderStatusList.PROCESSING) {
-                    if (!order.getPaymentMethod().getName().equals("Manual Bank Transfer")) {
-                        order.setStatus(newStatus);
+                    if (!foundOrder.getPaymentMethod().getName().equals("Manual Bank Transfer")) {
+                        foundOrder.setStatus(newStatus);
 
                         // ADD AUTOMATIC STOCK MUTATION CODE HERE
 
@@ -71,13 +78,13 @@ public class UpdateOrderServiceImpl implements UpdateOrderService {
             case PAYMENT_VERIFICATION -> {
                 if (userRole.equals("Super Admin")) {
                     if (newStatus == OrderStatusList.WAITING_FOR_PAYMENT) {
-                        if (order.getPaymentProof() != null) {
-                            deleteCloudinaryService.deleteFromCloudinary(order.getPaymentProof());
-                            order.setPaymentProof(null);
+                        if (foundOrder.getPaymentProof() != null) {
+                            deleteCloudinaryService.deleteFromCloudinary(foundOrder.getPaymentProof());
+                            foundOrder.setPaymentProof(null);
                         }
-                        order.setStatus(newStatus);
+                        foundOrder.setStatus(newStatus);
                     } else if (newStatus == OrderStatusList.PROCESSING) {
-                        order.setStatus(newStatus);
+                        foundOrder.setStatus(newStatus);
 
                         // ADD AUTOMATIC STOCK MUTATION CODE HERE
 
@@ -88,26 +95,26 @@ public class UpdateOrderServiceImpl implements UpdateOrderService {
             }
             case PROCESSING -> {
                 if (userRole.equals("Super Admin") && newStatus == OrderStatusList.CANCELED) {
-                    order.setStatus(newStatus);
+                    foundOrder.setStatus(newStatus);
                 } else if (userRole.equals("Super Admin") && newStatus == OrderStatusList.ON_DELIVERY) {
 
                     // CODE to Check Warehouse Stock quantity = Order Quantity
 
-                    order.setStatus(newStatus);
+                    foundOrder.setStatus(newStatus);
                 } else {
                     throw new IllegalStateException("Only Super Admin can move order to ON_DELIVERY or CANCELED");
                 }
             }
             case ON_DELIVERY -> {
                 if (userRole.equals("Customer") && newStatus == OrderStatusList.COMPLETED) {
-                    order.setStatus(newStatus);
+                    foundOrder.setStatus(newStatus);
                 } else {
                     throw new IllegalStateException("Order cannot be marked as completed yet");
                 }
             }
             default -> throw new IllegalArgumentException("Invalid status transition");
         }
-        return orderRepository.save(order);
+        return orderRepository.save(foundOrder);
     }
 
     private boolean isValidFileType(MultipartFile file) {

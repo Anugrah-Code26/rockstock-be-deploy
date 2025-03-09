@@ -8,10 +8,19 @@ import com.rockstock.backend.infrastructure.order.repository.OrderRepository;
 import com.rockstock.backend.infrastructure.user.auth.security.Claims;
 import com.rockstock.backend.service.order.GetOrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.YearMonth;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,34 +32,64 @@ public class GetOrderServiceImpl implements GetOrderService {
 
     @Override
     @Transactional
-    public List<GetOrderResponseDTO> getFilteredOrders(Long warehouseId, OrderStatusList status) {
+    public Page<GetOrderResponseDTO> getFilteredOrders(
+            Long warehouseId,
+            OrderStatusList status,
+            Integer page,
+            Integer size,
+            String sortBy,
+            String sortDirection,
+            LocalDate startDate,
+            LocalDate endDate,
+            YearMonth monthYear,
+            Integer year) {
+
         Long userId = Claims.getUserIdFromJwt();
         String role = Claims.getRoleFromJwt();
         List<Long> warehouseIds = Claims.getWarehouseIdsFromJwt();
 
-        List<Order> filteredOrders;
+        Pageable pageable = PageRequest.of(page, size,
+                Sort.by("DESC".equalsIgnoreCase(sortDirection) ? Sort.Direction.DESC : Sort.Direction.ASC,
+                        sortBy != null ? sortBy : "createdAt"));
 
-        if ("Super Admin".equals(role) && warehouseId == null && status == null) {
-            filteredOrders = orderRepository.findAllWithDetails();
-        } else if ("Customer".equals(role)) {
-            filteredOrders = status != null
-                    ? orderRepository.findAllByUserIdAndStatus(userId, status)
-                    : orderRepository.findAllByUserId(userId);
+        Specification<Order> spec = Specification.where(null);
+
+        // Role-based access control
+        if ("Customer".equals(role)) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("user").get("id"), userId));
         } else if (warehouseId != null) {
             if ("Warehouse Admin".equals(role) && !warehouseIds.contains(warehouseId)) {
                 throw new AuthorizationDeniedException("You do not have access to this warehouse!");
             }
-            filteredOrders = (status != null)
-                    ? orderRepository.findAllByWarehouseIdAndStatus(warehouseId, status)
-                    : orderRepository.findAllByWarehouseId(warehouseId);
-        } else if (status != null && "Super Admin".equals(role)) {
-            filteredOrders = orderRepository.findAllByStatus(status);
-        } else {
-            throw new IllegalArgumentException("Invalid filter combination");
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("warehouse").get("id"), warehouseId));
         }
 
-        return filteredOrders.stream().map(GetOrderResponseDTO::new).toList();
+        if (status != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), status));
+        }
+
+        // Date range filter (convert LocalDate to OffsetDateTime)
+        if (startDate != null && endDate != null) {
+            OffsetDateTime startDateTime = startDate.atStartOfDay(ZoneOffset.UTC).toOffsetDateTime();
+            OffsetDateTime endDateTime = endDate.atTime(23, 59, 59).atOffset(ZoneOffset.UTC);
+            spec = spec.and((root, query, cb) -> cb.between(root.get("createdAt"), startDateTime, endDateTime));
+        }
+
+        // Filter by month and year
+        if (monthYear != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(cb.function("MONTH", Integer.class, root.get("createdAt")), monthYear.getMonthValue()))
+                    .and((root, query, cb) -> cb.equal(cb.function("YEAR", Integer.class, root.get("createdAt")), monthYear.getYear()));
+        }
+
+        // Filter by year
+        if (year != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(cb.function("YEAR", Integer.class, root.get("createdAt")), year));
+        }
+
+        Page<Order> filteredOrders = orderRepository.findAll(spec, pageable);
+        return filteredOrders.map(GetOrderResponseDTO::new);
     }
+
 
     @Override
     @Transactional

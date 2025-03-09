@@ -10,11 +10,14 @@ import com.rockstock.backend.infrastructure.order.dto.UpdateOrderRequestDTO;
 import com.rockstock.backend.service.order.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,9 +42,19 @@ public class OrderController {
     @GetMapping
     public ResponseEntity<?> getFilteredOrders(
             @RequestParam(required = false) Long warehouseId,
-            @RequestParam(required = false) OrderStatusList status
+            @RequestParam(required = false) OrderStatusList status,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "DESC") String sortDirection,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(required = false) YearMonth monthYear,
+            @RequestParam(required = false) Integer year
     ) {
-        List<GetOrderResponseDTO> filteredOrders = getOrderService.getFilteredOrders(warehouseId, status);
+        Page<GetOrderResponseDTO> filteredOrders = getOrderService.getFilteredOrders(
+                warehouseId, status, page, size, sortBy, sortDirection, startDate, endDate, monthYear, year
+        );
         return ApiResponse.success(HttpStatus.OK.value(), "Orders retrieved successfully!", filteredOrders);
     }
 
@@ -73,13 +86,14 @@ public class OrderController {
     // Update
     @PatchMapping("/statuses/status")
     public ResponseEntity<?> updateOrderStatus(
-            @RequestParam Long orderId,
+            @RequestParam(required = false) Long orderId,
+            @RequestParam(required = false) String orderCode,
             @RequestParam("newStatus") OrderStatusList newStatus,
             @RequestPart(value = "paymentProof", required = false) MultipartFile paymentProof) {
 
         UpdateOrderRequestDTO req = new UpdateOrderRequestDTO();
         req.setPaymentProof(paymentProof);
 
-        return ApiResponse.success(HttpStatus.OK.value(), "Order status updated successfully!", updateOrderService.updateOrderStatus(newStatus, orderId, req));
+        return ApiResponse.success(HttpStatus.OK.value(), "Order status updated successfully!", updateOrderService.updateOrderStatus(newStatus, orderId, orderCode, req));
     }
 }

@@ -36,6 +36,11 @@ public class WarehouseController {
         return ResponseEntity.ok(warehouseService.getAllWarehouses());
     }
 
+    @GetMapping("/warehouse-admin")
+    public ResponseEntity<List<WarehouseResponseDTO>> getWarehousesByWarehouseAdmin() {
+        return ResponseEntity.ok(warehouseService.getWarehousesByWarehouseAdmin());
+    }
+
     @GetMapping("/nearest")
     public ResponseEntity<?> findNearestWarehouse(
             @RequestParam String latitude,
