@@ -64,7 +64,7 @@ public class SecurityConfig {
                         // Public endpoints
                         .requestMatchers("/error/**").permitAll()
                         .requestMatchers("/api/v1/geolocations/**").permitAll()
-                        .requestMatchers("/api/v1/user/register").permitAll()
+                        .requestMatchers("/api/v1/auth/register").permitAll()
                         .requestMatchers("/api/v1/auth/login").permitAll()
                         .requestMatchers("/api/v1/auth/google/login").permitAll()
                         .requestMatchers("/api/v1/auth/oauth/google").permitAll()
@@ -73,8 +73,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/user/profile").permitAll()
                         .requestMatchers("/api/v1/user/upload-avatar").permitAll()
                         .requestMatchers("/api/v1/user/confirm-reset-password").permitAll()
-                        .requestMatchers("/api/v1/warehouse/**").permitAll()
-                        .requestMatchers("/api/v1/warehouse-admins/**").permitAll()
                         .requestMatchers("/api/v1/auth/resend-verification").permitAll()
                         .requestMatchers("/api/v1/auth/forgot-password").permitAll()
                         .requestMatchers("/api/v1/auth/setup-password").permitAll()

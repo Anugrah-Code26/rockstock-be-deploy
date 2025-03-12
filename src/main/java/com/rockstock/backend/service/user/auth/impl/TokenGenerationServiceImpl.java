@@ -78,7 +78,7 @@ public class TokenGenerationServiceImpl implements TokenGenerationService {
                 .issuedAt(now)
                 .expiresAt(now.plusSeconds(ACCESS_TOKEN_EXPIRY))
                 .subject(jwt.getSubject())
-                .claim("scope", jwt.getClaimAsString("scope"))
+                .claim("roles", jwt.getClaimAsString("roles"))
                 .claim("userId", jwt.getClaimAsString("userId"))
                 .claim("type", TokenType.ACCESS.name())
                 .build();

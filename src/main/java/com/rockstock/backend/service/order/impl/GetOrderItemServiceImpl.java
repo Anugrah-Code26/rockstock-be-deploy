@@ -30,10 +30,6 @@ public class GetOrderItemServiceImpl implements GetOrderItemService {
         Long userId = Claims.getUserIdFromJwt();
         String role = Claims.getRoleFromJwt();
 
-        if (!"Customer".equals(role)){
-            throw new AuthorizationDeniedException("Access Denied !");
-        }
-
         List<OrderItem> orderItems;
         if (orderId == null && orderCode == null && productName == null) {
             orderItems = orderItemRepository.findAllByUserId(userId);
@@ -41,8 +37,10 @@ public class GetOrderItemServiceImpl implements GetOrderItemService {
             Order order = orderRepository.findById(orderId)
                     .orElseThrow(() -> new DataNotFoundException("Order not found"));
 
-            if (!order.getUser().getId().equals(userId)) {
-                throw new UnauthorizedException("Unauthorized: Order does not belong to the user");
+            if ("Customer".equals(role)){
+                if (!order.getUser().getId().equals(userId)) {
+                    throw new UnauthorizedException("Unauthorized: Order does not belong to the user");
+                }
             }
 
             orderItems = orderItemRepository.findAllByOrderId(orderId);
@@ -50,8 +48,10 @@ public class GetOrderItemServiceImpl implements GetOrderItemService {
             Order order = orderRepository.findByOrderCode(orderCode)
                     .orElseThrow(() -> new DataNotFoundException("Order not found"));
 
-            if (!order.getUser().getId().equals(userId)) {
-                throw new UnauthorizedException("Unauthorized: Order does not belong to the user");
+            if ("Customer".equals(role)){
+                if (!order.getUser().getId().equals(userId)) {
+                    throw new UnauthorizedException("Unauthorized: Order does not belong to the user");
+                }
             }
 
             orderItems = orderItemRepository.findAllByOrderCode(orderCode);
@@ -70,15 +70,13 @@ public class GetOrderItemServiceImpl implements GetOrderItemService {
         Long userId = Claims.getUserIdFromJwt();
         String role = Claims.getRoleFromJwt();
 
-        if (!"Customer".equals(role)){
-            throw new AuthorizationDeniedException("Access Denied !");
-        }
-
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new DataNotFoundException("Order not found"));
 
-        if (!order.getUser().getId().equals(userId)) {
-            throw new UnauthorizedException("Unauthorized: Order does not belong to the user");
+        if ("Customer".equals(role)){
+            if (!order.getUser().getId().equals(userId)) {
+                throw new UnauthorizedException("Unauthorized: Order does not belong to the user");
+            }
         }
 
         Optional<OrderItem> orderItemById = orderItemRepository.findByOrderIdAndId(orderId, id);
