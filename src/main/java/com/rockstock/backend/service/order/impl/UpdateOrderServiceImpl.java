@@ -10,6 +10,7 @@ import com.rockstock.backend.infrastructure.user.auth.security.Claims;
 import com.rockstock.backend.service.cloudinary.DeleteCloudinaryService;
 import com.rockstock.backend.service.mutation.AutomaticMutationService;
 import com.rockstock.backend.service.mutation.DestinationShipmentService;
+import com.rockstock.backend.service.mutation.ReleaseStockService;
 import com.rockstock.backend.service.order.UpdateOrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ public class UpdateOrderServiceImpl implements UpdateOrderService {
     private final DeleteCloudinaryService deleteCloudinaryService;
     private final AutomaticMutationService automaticMutationService;
     private final DestinationShipmentService destinationShipmentService;
+    private final ReleaseStockService releaseStockService;
 
     @Transactional
     public Order updateOrderStatus(OrderStatusList newStatus, Long orderId, String orderCode, UpdateOrderRequestDTO req) {
@@ -96,6 +98,7 @@ public class UpdateOrderServiceImpl implements UpdateOrderService {
             case PROCESSING -> {
                 if (userRole.equals("Super Admin") && newStatus == OrderStatusList.CANCELED) {
                     foundOrder.setStatus(newStatus);
+                    releaseStockService.releaseLockedStockForOrder(orderId);
                 } else if (userRole.equals("Super Admin") && newStatus == OrderStatusList.ON_DELIVERY) {
                     destinationShipmentService.shipOrder(foundOrder);
                     foundOrder.setStatus(newStatus);
