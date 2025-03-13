@@ -22,6 +22,7 @@ import com.rockstock.backend.infrastructure.user.auth.security.Claims;
 import com.rockstock.backend.infrastructure.user.repository.UserRepository;
 import com.rockstock.backend.infrastructure.warehouse.repository.WarehouseRepository;
 import com.rockstock.backend.service.cart.DeleteCartItemService;
+import com.rockstock.backend.service.mutation.LockStockService;
 import com.rockstock.backend.service.order.CreateOrderItemService;
 import com.rockstock.backend.service.order.CreateOrderService;
 import com.rockstock.backend.service.payment.MidtransPaymentService;
@@ -48,6 +49,7 @@ public class CreateOrderServiceImpl implements CreateOrderService {
     private final CreateOrderItemService createOrderItemService;
     private final DeleteCartItemService deleteCartItemService;
     private final MidtransPaymentService midtransPaymentService;
+    private final LockStockService lockStockService;
 
     @Override
     @Transactional
@@ -97,6 +99,8 @@ public class CreateOrderServiceImpl implements CreateOrderService {
 
         // Save order again with order code & payment method
         orderRepository.save(savedOrder);
+
+        lockStockService.lockStockForOrder(savedOrder.getId(), cart);
 
         // Save order items for history
         createOrderItemService.createOrderItem(savedOrder.getId());

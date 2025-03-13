@@ -2,7 +2,10 @@ package com.rockstock.backend.infrastructure.product.dto;
 
 import com.rockstock.backend.entity.product.Product;
 import com.rockstock.backend.entity.product.ProductStatus;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;

@@ -72,7 +72,7 @@ public class WarehouseStockController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String productName,
-            @RequestParam(required = false) String warehouseName,
+            @RequestParam(required = false) Long warehouseId,
             @RequestParam(defaultValue = "ASC") String sortOrder) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("product.productName").ascending());
@@ -81,7 +81,7 @@ public class WarehouseStockController {
             pageable = PageRequest.of(page, size, Sort.by("product.productName").descending());
         }
 
-        Page<WarehouseStockResponseDTO> warehouseStocks = warehouseStockService.getFilteredWarehouseStocks(productName, warehouseName, pageable);
+        Page<WarehouseStockResponseDTO> warehouseStocks = warehouseStockService.getFilteredWarehouseStocks(productName, warehouseId, pageable);
 
         if (warehouseStocks.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)

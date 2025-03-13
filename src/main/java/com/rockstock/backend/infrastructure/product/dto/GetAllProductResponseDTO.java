@@ -1,12 +1,16 @@
 package com.rockstock.backend.infrastructure.product.dto;
 
 import com.rockstock.backend.entity.product.Product;
+import com.rockstock.backend.entity.product.ProductPicture;
 import com.rockstock.backend.infrastructure.productPicture.dto.GetProductPicturesResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
@@ -18,8 +22,9 @@ public class GetAllProductResponseDTO {
     private BigDecimal price;
     private BigDecimal weight;
     private BigDecimal totalStock;
-    private String productCategory;
-    private GetProductPicturesResponseDTO productPictures;
+    private Long categoryId;
+    private String categoryName;
+    private List<GetProductPicturesResponseDTO> productPictures;
 
     public static GetAllProductResponseDTO fromProduct(Product product, BigDecimal totalStock) {
         return new GetAllProductResponseDTO(
@@ -28,13 +33,14 @@ public class GetAllProductResponseDTO {
                 product.getDetail(),
                 product.getPrice(),
                 product.getWeight(),
-                product.getTotalStock(),
+                totalStock,
+                product.getProductCategory().getId(),
                 product.getProductCategory().getCategoryName(),
                 product.getProductPictures().stream()
-                        .filter(picture -> picture.getPosition() == 1) // ✅ Ensure only position 1 is selected
-                        .findFirst() // Get the first (position 1) picture
+                        .sorted(Comparator.comparingInt(ProductPicture::getPosition)) // ✅ Sort by position
+                        .limit(3) // ✅ Take only the first 3 pictures
                         .map(GetProductPicturesResponseDTO::fromProductPicture)
-                        .orElse(null) // If no picture at position 1, return null
+                        .collect(Collectors.toList())
         );
     }
 }

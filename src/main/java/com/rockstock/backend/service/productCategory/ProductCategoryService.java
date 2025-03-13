@@ -1,5 +1,6 @@
 package com.rockstock.backend.service.productCategory;
 
+import com.rockstock.backend.common.exceptions.DuplicateDataException;
 import com.rockstock.backend.entity.product.ProductCategory;
 import com.rockstock.backend.infrastructure.product.repository.ProductRepository;
 import com.rockstock.backend.infrastructure.productCategory.dto.*;
@@ -32,7 +33,7 @@ public class ProductCategoryService {
         String categoryName = createProductCategoryRequestDTO.getCategoryName().trim();
 
         if (productCategoryRepository.existsByCategoryName(categoryName)) {
-            throw new IllegalArgumentException("Category name already exists.");
+            throw new DuplicateDataException("Category name already exists.");
         }
 
         String imageUrl;
@@ -42,10 +43,9 @@ public class ProductCategoryService {
                 throw new IOException("Failed to upload image to Cloudinary.", e);
         }
 
-        // Create new ProductCategory entity
         ProductCategory productCategory = new ProductCategory();
         productCategory.setCategoryName(categoryName);
-        productCategory.setCategoryPicture(imageUrl); // Store uploaded image URL
+        productCategory.setCategoryPicture(imageUrl);
 
         ProductCategory savedCategory = productCategoryRepository.save(productCategory);
 
@@ -61,24 +61,20 @@ public class ProductCategoryService {
         ProductCategory productCategory = productCategoryRepository.findByCategoryId(requestDTO.getCategoryId())
                 .orElseThrow(() -> new EntityNotFoundException("Category not found: " + requestDTO.getCategoryId()));
 
-        // Update category name if provided
         if (requestDTO.getCategoryName() != null && !requestDTO.getCategoryName().isBlank() &&
                 !productCategory.getCategoryName().equalsIgnoreCase(requestDTO.getCategoryName())) {
 
             if (productCategoryRepository.existsByCategoryName(requestDTO.getCategoryName())) {
-                throw new IllegalArgumentException("Category name already exists: " + requestDTO.getCategoryName());
+                throw new DuplicateDataException("Category name already exists: " + requestDTO.getCategoryName());
             }
             productCategory.setCategoryName(requestDTO.getCategoryName());
         }
 
-        // Upload new picture if provided
         if (requestDTO.getFile() != null && !requestDTO.getFile().isEmpty()) {
-            // Delete old picture from Cloudinary if it exists
             if (productCategory.getCategoryPicture() != null) {
                 deleteCloudinaryService.deleteFromCloudinary(productCategory.getCategoryPicture());
             }
 
-            // Upload new picture
             String imageUrl = cloudinaryService.uploadFile(requestDTO.getFile());
             productCategory.setCategoryPicture(imageUrl);
         }
@@ -95,15 +91,13 @@ public class ProductCategoryService {
     @Transactional
     public void softDeleteProductCategory(Long categoryId) {
         ProductCategory productCategory = productCategoryRepository.findByCategoryId(categoryId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Category not found"));
 
-        // Check if there are any products using this category
         boolean hasProducts = productRepository.existsByProductCategory(productCategory);
         if (hasProducts) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot delete category: Products are still using this category.");
         }
 
-        // Perform soft delete by setting deletedAt timestamp
         productCategory.setDeletedAt(OffsetDateTime.now());
         productCategoryRepository.save(productCategory);
     }
@@ -136,7 +130,6 @@ public class ProductCategoryService {
         ProductCategory productCategory = productCategoryRepository.findByCategoryId(categoryId)
                 .orElseThrow(() -> new EntityNotFoundException("Product Category with ID " + categoryId + " not found"));
 
-        // Return a DTO instead of the entity
         return new GetProductCategoryResponseDTO(productCategory.getId(), productCategory.getCategoryPicture(), productCategory.getCategoryName());
     }
 }

@@ -2,6 +2,7 @@ package com.rockstock.backend.infrastructure.product.dto;
 
 import com.rockstock.backend.entity.product.Product;
 import com.rockstock.backend.entity.product.ProductPicture;
+import com.rockstock.backend.entity.product.ProductStatus;
 import com.rockstock.backend.infrastructure.productPicture.dto.GetProductPicturesResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,21 +24,25 @@ public class GetProductResponseDTO {
     private BigDecimal weight;
     private BigDecimal totalStock;
     private String productCategory;
+    private Long categoryId;
     private List<GetProductPicturesResponseDTO> productPictures;
+    private ProductStatus status;
 
-    public static GetProductResponseDTO fromProduct(Product product) {
+    public static GetProductResponseDTO fromProduct(Product product, BigDecimal totalStock) {
         return new GetProductResponseDTO(
                 product.getId(),
                 product.getProductName(),
                 product.getDetail(),
                 product.getPrice(),
                 product.getWeight(),
-                product.getTotalStock(), // Sum all stock values
-                product.getProductCategory().getCategoryName(), // Assuming category has a `getCategoryName()`
+                totalStock,
+                product.getProductCategory().getCategoryName(),
+                product.getProductCategory().getId(),
                 product.getProductPictures().stream()
-                        .sorted(Comparator.comparing(ProductPicture::getPosition)) // Sort pictures by position
-                        .map(GetProductPicturesResponseDTO::fromProductPicture) // Convert to DTO
-                        .collect(Collectors.toList())
+                        .sorted(Comparator.comparing(ProductPicture::getPosition))
+                        .map(GetProductPicturesResponseDTO::fromProductPicture)
+                        .collect(Collectors.toList()),
+                product.getStatus()
         );
     }
 }

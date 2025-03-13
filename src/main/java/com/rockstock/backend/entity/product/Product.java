@@ -7,6 +7,7 @@ import com.rockstock.backend.entity.order.OrderItem;
 import com.rockstock.backend.entity.stock.WarehouseStock;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,11 +33,13 @@ public class Product {
     private Long id;
 
     @NotNull
-    @Column(name = "product_name", nullable = false)
+    @Size(min = 3, max = 30)
+    @Column(name = "product_name", nullable = false, length = 30)
     private String productName;
 
     @NotNull
-    @Column(nullable = false)
+    @Size(min = 3, max = 100)
+    @Column(nullable = false, length = 100)
     private String detail;
 
     @NotNull
@@ -100,9 +103,9 @@ public class Product {
 
     @JsonManagedReference
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<CartItem> cartItems = new HashSet<>();
+    private Set<OrderItem> orderItems = new HashSet<>();
 
     @JsonManagedReference
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<OrderItem> orderItems = new HashSet<>();
+    private Set<CartItem> cartItems = new HashSet<>();
 }

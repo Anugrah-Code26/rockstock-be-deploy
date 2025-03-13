@@ -8,6 +8,8 @@ import com.rockstock.backend.infrastructure.order.dto.UpdateOrderRequestDTO;
 import com.rockstock.backend.infrastructure.order.repository.OrderRepository;
 import com.rockstock.backend.infrastructure.user.auth.security.Claims;
 import com.rockstock.backend.service.cloudinary.DeleteCloudinaryService;
+import com.rockstock.backend.service.mutation.AutomaticMutationService;
+import com.rockstock.backend.service.mutation.DestinationShipmentService;
 import com.rockstock.backend.service.order.UpdateOrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,8 @@ public class UpdateOrderServiceImpl implements UpdateOrderService {
     private final Cloudinary cloudinary;
     private final OrderRepository orderRepository;
     private final DeleteCloudinaryService deleteCloudinaryService;
+    private final AutomaticMutationService automaticMutationService;
+    private final DestinationShipmentService destinationShipmentService;
 
     @Transactional
     public Order updateOrderStatus(OrderStatusList newStatus, Long orderId, String orderCode, UpdateOrderRequestDTO req) {
@@ -67,9 +71,7 @@ public class UpdateOrderServiceImpl implements UpdateOrderService {
                 } else if (newStatus == OrderStatusList.PROCESSING) {
                     if (!foundOrder.getPaymentMethod().getName().equals("Manual Bank Transfer")) {
                         foundOrder.setStatus(newStatus);
-
-                        // ADD AUTOMATIC STOCK MUTATION CODE HERE
-
+                        automaticMutationService.transferLockedStockForOrder(orderId);
                     } else {
                         throw new IllegalArgumentException("Invalid payment method or payment not completed");
                     }
@@ -85,9 +87,7 @@ public class UpdateOrderServiceImpl implements UpdateOrderService {
                         foundOrder.setStatus(newStatus);
                     } else if (newStatus == OrderStatusList.PROCESSING) {
                         foundOrder.setStatus(newStatus);
-
-                        // ADD AUTOMATIC STOCK MUTATION CODE HERE
-
+                        automaticMutationService.transferLockedStockForOrder(orderId);
                     }
                 } else {
                     throw new IllegalStateException("Only Super Admin can approve or reject payments");
@@ -97,9 +97,7 @@ public class UpdateOrderServiceImpl implements UpdateOrderService {
                 if (userRole.equals("Super Admin") && newStatus == OrderStatusList.CANCELED) {
                     foundOrder.setStatus(newStatus);
                 } else if (userRole.equals("Super Admin") && newStatus == OrderStatusList.ON_DELIVERY) {
-
-                    // CODE to Check Warehouse Stock quantity = Order Quantity
-
+                    destinationShipmentService.shipOrder(foundOrder);
                     foundOrder.setStatus(newStatus);
                 } else {
                     throw new IllegalStateException("Only Super Admin can move order to ON_DELIVERY or CANCELED");

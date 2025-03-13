@@ -23,22 +23,18 @@ public class RestoreProductService {
 
     @Transactional
     public void restoreProduct(Long id) {
-        // Find the product by ID with a non-null deletedAt field (soft deleted)
         Product product = productRepository.findByIdAndDeletedAtIsNotNull(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found or not deleted"));
 
-        // Restore the product by setting deletedAt to null
         product.setDeletedAt(null);
         productRepository.save(product);
 
-        // Restore related ProductPicture entries by setting their deletedAt field to null
         List<ProductPicture> productPictures = productPictureRepository.findByProductIdAndDeletedAtIsNotNull(id);
         for (ProductPicture picture : productPictures) {
             picture.setDeletedAt(null);
             productPictureRepository.save(picture);
         }
 
-        // Restore related WarehouseStock entries by setting their deletedAt field to null
         List<WarehouseStock> warehouseStocks = warehouseStockRepository.findByProductIdAndDeletedAtIsNotNull(id);
         for (WarehouseStock stock : warehouseStocks) {
             stock.setDeletedAt(null);

@@ -8,23 +8,27 @@ public class FilterProductSpecifications {
     public static Specification<Product> hasProductName(String name) {
         return (root, query, criteriaBuilder) -> {
             if (name == null || name.isEmpty()) {
-                return criteriaBuilder.conjunction(); // No filter if name is null or empty
+                return criteriaBuilder.conjunction();
             }
             return criteriaBuilder.like(criteriaBuilder.lower(root.get("productName")), "%" + name.toLowerCase() + "%");
         };
     }
 
-    public static Specification<Product> hasCategoryName(String category) {
+    public static Specification<Product> hasCategoryId(Long categoryId) {
         return (root, query, criteriaBuilder) -> {
-            if (category == null || category.isEmpty()) {
-                return criteriaBuilder.conjunction(); // No filter if category is null or empty
+            if (categoryId == null) {
+                return criteriaBuilder.conjunction();
             }
-            return criteriaBuilder.like(criteriaBuilder.lower(root.get("productCategory").get("categoryName")), "%" + category.toLowerCase() + "%");
+            return criteriaBuilder.equal(root.get("productCategory").get("id"), categoryId);
         };
     }
 
-    public static Specification<Product> hasStatus(ProductStatus status) {
-        return (root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(root.get("status"), status);
+    public static Specification<Product> hasStatus(ProductStatus... statuses) {
+        return (root, query, criteriaBuilder) -> {
+            if (statuses == null || statuses.length == 0) {
+                return criteriaBuilder.conjunction();
+            }
+            return root.get("status").in((Object[]) statuses);
+        };
     }
 }

@@ -1,5 +1,6 @@
 package com.rockstock.backend.service.product;
 
+import com.rockstock.backend.common.exceptions.DuplicateDataException;
 import com.rockstock.backend.entity.product.Product;
 import com.rockstock.backend.entity.product.ProductCategory;
 import com.rockstock.backend.entity.product.ProductStatus;
@@ -34,7 +35,7 @@ public class UpdateProductService {
     private final WarehouseRepository warehouseRepository;
     private final WarehouseStockRepository warehouseStockRepository;
 
-    public UpdateProductResponseDTO updateProduct(Long id, UpdateProductRequestDTO updateProductRequestDTO) {
+    public UpdateProductResponseDTO updateProductToActive(Long id, UpdateProductRequestDTO updateProductRequestDTO) {
         Product product = productRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
@@ -42,24 +43,17 @@ public class UpdateProductService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only draft products can be updated");
         }
 
-        // Update only if the new name is different and doesn't already exist
         if (StringUtils.isNotBlank(updateProductRequestDTO.getProductName()) &&
                 !updateProductRequestDTO.getProductName().equals(product.getProductName())) {
             boolean exists = productRepository.existsByProductName(updateProductRequestDTO.getProductName());
             if (exists) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "Product name already exists");
+                throw new DuplicateDataException("Product name already exists");
             }
             product.setProductName(updateProductRequestDTO.getProductName());
         }
 
-        // Update category only if a new category is provided and is different
         if (updateProductRequestDTO.getCategoryId() != null &&
                 (product.getProductCategory() == null || !updateProductRequestDTO.getCategoryId().equals(product.getProductCategory().getId()))) {
-
-            // Prevent assigning default category (ID = 1)
-            if (updateProductRequestDTO.getCategoryId() == 1L) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot assign the default category.");
-            }
 
             ProductCategory productCategory = productCategoryRepository.findByCategoryId(updateProductRequestDTO.getCategoryId())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found or deleted: " + updateProductRequestDTO.getCategoryId()));
@@ -67,33 +61,30 @@ public class UpdateProductService {
             product.setProductCategory(productCategory);
         }
 
-        // Update fields only if they are different from current values
         if (StringUtils.isNotBlank(updateProductRequestDTO.getDetail()) &&
                 !updateProductRequestDTO.getDetail().equals(product.getDetail())) {
             product.setDetail(updateProductRequestDTO.getDetail());
         }
 
-        // Update price if changed
         if (updateProductRequestDTO.getPrice() != null &&
                 (product.getPrice() == null || product.getPrice().compareTo(updateProductRequestDTO.getPrice()) != 0)) {
             product.setPrice(updateProductRequestDTO.getPrice());
         }
 
-        // Update weight if changed
         if (updateProductRequestDTO.getWeight() != null &&
                 (product.getWeight() == null || product.getWeight().compareTo(updateProductRequestDTO.getWeight()) != 0)) {
             product.setWeight(updateProductRequestDTO.getWeight());
         }
 
-        // Validate and update status
-        if (isValidProduct(product)) {
+        if (!isValidProduct(product)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product is not valid. Please ensure all fields are correctly filled.");
+        } else {
             product.setStatus(ProductStatus.ACTIVE);
-                createWarehouseStockForProduct(product);
+            createWarehouseStockForProduct(product);
         }
 
         product.setUpdatedAt(OffsetDateTime.now());
 
-        // Save the updated product
         Product updatedProduct = productRepository.save(product);
         return UpdateProductResponseDTO.fromProduct(updatedProduct);
     }
@@ -105,7 +96,7 @@ public class UpdateProductService {
                 && StringUtils.isNotBlank(product.getDetail()) && !product.getDetail().equals("This is a draft product.")
                 && product.getPrice() != null && product.getPrice().compareTo(BigDecimal.ZERO) > 0
                 && product.getWeight() != null && product.getWeight().compareTo(BigDecimal.ZERO) > 0
-                && product.getProductCategory() != null && product.getProductCategory().getId() != 1L
+                && product.getProductCategory() != null
                 && hasMainImage;
     }
 
@@ -127,4 +118,47 @@ public class UpdateProductService {
             warehouseStockRepository.saveAll(warehouseStocks);
         }
     }
+
+    public UpdateProductResponseDTO updateProductToDraft(Long id, UpdateProductRequestDTO updateProductRequestDTO) {
+        Product product = productRepository.findByIdAndDeletedAtIsNull(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+
+        if (product.getStatus() != ProductStatus.DRAFT) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only draft products can be updated");
+        }
+
+        if (StringUtils.isNotBlank(updateProductRequestDTO.getProductName())) {
+            product.setProductName(updateProductRequestDTO.getProductName());
+        }
+
+        if (updateProductRequestDTO.getCategoryId() != null &&
+                (product.getProductCategory() == null || !updateProductRequestDTO.getCategoryId().equals(product.getProductCategory().getId()))) {
+
+            ProductCategory productCategory = productCategoryRepository.findByCategoryId(updateProductRequestDTO.getCategoryId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found or deleted: " + updateProductRequestDTO.getCategoryId()));
+
+            product.setProductCategory(productCategory);
+        }
+
+        if (StringUtils.isNotBlank(updateProductRequestDTO.getDetail()) &&
+                !updateProductRequestDTO.getDetail().equals(product.getDetail())) {
+            product.setDetail(updateProductRequestDTO.getDetail());
+        }
+
+        if (updateProductRequestDTO.getPrice() != null &&
+                (product.getPrice() == null || product.getPrice().compareTo(updateProductRequestDTO.getPrice()) != 0)) {
+            product.setPrice(updateProductRequestDTO.getPrice());
+        }
+
+        if (updateProductRequestDTO.getWeight() != null &&
+                (product.getWeight() == null || product.getWeight().compareTo(updateProductRequestDTO.getWeight()) != 0)) {
+            product.setWeight(updateProductRequestDTO.getWeight());
+        }
+
+        product.setUpdatedAt(OffsetDateTime.now());
+
+        Product updatedProduct = productRepository.save(product);
+        return UpdateProductResponseDTO.fromProduct(updatedProduct);
+    }
+
 }

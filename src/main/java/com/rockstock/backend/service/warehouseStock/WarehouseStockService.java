@@ -3,10 +3,10 @@ package com.rockstock.backend.service.warehouseStock;
 import com.rockstock.backend.entity.product.Product;
 import com.rockstock.backend.entity.stock.WarehouseStock;
 import com.rockstock.backend.entity.warehouse.Warehouse;
-import com.rockstock.backend.infrastructure.warehouseStock.dto.WarehouseStockResponseDTO;
-import com.rockstock.backend.infrastructure.warehouseStock.repository.WarehouseStockRepository;
 import com.rockstock.backend.infrastructure.product.repository.ProductRepository;
 import com.rockstock.backend.infrastructure.warehouse.repository.WarehouseRepository;
+import com.rockstock.backend.infrastructure.warehouseStock.dto.WarehouseStockResponseDTO;
+import com.rockstock.backend.infrastructure.warehouseStock.repository.WarehouseStockRepository;
 import com.rockstock.backend.infrastructure.warehouseStock.specification.FilterWarehouseStockSpecification;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -79,8 +79,8 @@ public class WarehouseStockService {
         }
     }
 
-    public Page<WarehouseStockResponseDTO> getFilteredWarehouseStocks(String productName, String warehouseName, Pageable pageable) {
-        Specification<WarehouseStock> spec = FilterWarehouseStockSpecification.withFilters(productName, warehouseName);
+    public Page<WarehouseStockResponseDTO> getFilteredWarehouseStocks(String productName, Long warehouseId, Pageable pageable) {
+        Specification<WarehouseStock> spec = FilterWarehouseStockSpecification.withFilters(productName, warehouseId);
 
         Page<WarehouseStock> stocks = warehouseStockRepository.findAll(spec, pageable);
 

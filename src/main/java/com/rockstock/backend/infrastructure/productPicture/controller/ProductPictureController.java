@@ -1,8 +1,11 @@
 package com.rockstock.backend.infrastructure.productPicture.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rockstock.backend.common.exceptions.DataNotFoundException;
 import com.rockstock.backend.common.response.ApiResponse;
-import com.rockstock.backend.infrastructure.productPicture.dto.*;
+import com.rockstock.backend.infrastructure.productPicture.dto.CreateProductPictureResponseDTO;
+import com.rockstock.backend.infrastructure.productPicture.dto.GetProductPicturesResponseDTO;
+import com.rockstock.backend.infrastructure.productPicture.dto.UpdatePicturePositionRequestDTO;
+import com.rockstock.backend.infrastructure.productPicture.dto.UpdatePicturePositionResponseDTO;
 import com.rockstock.backend.service.productPicture.ProductPictureService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,21 +23,15 @@ import java.util.List;
 public class ProductPictureController {
     private final ProductPictureService productPictureService;
 
-    @PostMapping("/{productId}/create")
+    @PostMapping("/{productId}/{position}/upload")
     @PreAuthorize("permitAll()")
     public ResponseEntity<ApiResponse<CreateProductPictureResponseDTO>> createProductPicture(
             @PathVariable Long productId,
-            @RequestParam("file") MultipartFile file,
-            @RequestPart("request") String requestJson) throws IOException {
+            @PathVariable Integer position,
+            @RequestParam("file") MultipartFile file) throws IOException {
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        CreateProductPictureRequestDTO requestDTO = objectMapper.readValue(requestJson, CreateProductPictureRequestDTO.class);
-
-        // Set the productId from path variable
-        requestDTO.setProductId(productId);
-
-        CreateProductPictureResponseDTO response = productPictureService.createProductPicture(requestDTO, file);
-        return ApiResponse.success("Create new category success", response);
+        CreateProductPictureResponseDTO response = productPictureService.createProductPicture(productId, file, position);
+        return ApiResponse.success("Create new product picture success", response);
     }
 
     // 📌 Update Picture Position (Drag & Drop Reordering)
@@ -54,21 +51,29 @@ public class ProductPictureController {
 
     @GetMapping("/{productId}")
     public ResponseEntity<ApiResponse<List<GetProductPicturesResponseDTO>>> getAllProductPictures(@PathVariable Long productId) {
-        List<GetProductPicturesResponseDTO> pictures = productPictureService.getAllProductPictures(productId);
+        try {
+            List<GetProductPicturesResponseDTO> pictures = productPictureService.getAllProductPictures(productId);
 
-        if (pictures.isEmpty()) {
-            return ApiResponse.failed(HttpStatus.NOT_FOUND.value(), "No pictures found");
+            // If no pictures are found, still return 200 OK with an empty array
+            if (pictures.isEmpty()) {
+                return ApiResponse.success("No pictures found", pictures);  // You can change the message as needed
+            }
+
+            return ApiResponse.success("Pictures found", pictures);
+
+        } catch (DataNotFoundException ex) {
+            return ApiResponse.failed(HttpStatus.NOT_FOUND.value(), ex.getMessage());
+        } catch (Exception ex) {
+            return ApiResponse.failed(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An error occurred");
         }
-
-        return ApiResponse.success("Pictures found", pictures);
     }
 
-    @DeleteMapping("/{productId}/{pictureId}/pictures")
+    @DeleteMapping("/{productId}/{position}/delete")
     public ResponseEntity<String> deleteProductPicture(
             @PathVariable Long productId,
-            @PathVariable Long pictureId) {
+            @PathVariable int position) {
 
-        productPictureService.deleteProductPicture(productId, pictureId);
+        productPictureService.deleteProductPicture(productId, position);
         return ResponseEntity.ok("Product picture deleted successfully");
     }
 }

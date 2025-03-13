@@ -1,7 +1,5 @@
 package com.rockstock.backend.entity.stock;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.rockstock.backend.entity.product.Product;
 import com.rockstock.backend.entity.warehouse.Warehouse;
 import jakarta.persistence.*;
@@ -28,10 +26,13 @@ public class WarehouseStock {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "warehouse_stock_id_gen")
     @SequenceGenerator(name = "warehouse_stock_id_gen", sequenceName = "warehouse_stock_id_seq", schema = "rockstock", allocationSize = 1)
     @Column(name = "warehouse_stock_id", nullable = false)
-    private Long Id;
+    private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "stock_quantity", nullable = false)
     private Long stockQuantity;
+
+    @Column(name = "locked_quantity")
+    private Long lockedQuantity;
 
     @Column(name = "deleted_at")
     private OffsetDateTime deletedAt;
@@ -61,17 +62,14 @@ public class WarehouseStock {
     }
 
     // Relationships
-    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "warehouse_id", nullable = false)
     private Warehouse warehouse;
 
-    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
-    @JsonManagedReference
     @OneToMany(mappedBy = "warehouseStock", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<MutationJournal> mutationJournals = new HashSet<>();
 }

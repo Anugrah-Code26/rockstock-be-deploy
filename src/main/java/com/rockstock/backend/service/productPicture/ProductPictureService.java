@@ -1,9 +1,13 @@
 package com.rockstock.backend.service.productPicture;
 
+import com.rockstock.backend.common.exceptions.DataNotFoundException;
 import com.rockstock.backend.entity.product.Product;
 import com.rockstock.backend.entity.product.ProductPicture;
 import com.rockstock.backend.infrastructure.product.repository.ProductRepository;
-import com.rockstock.backend.infrastructure.productPicture.dto.*;
+import com.rockstock.backend.infrastructure.productPicture.dto.CreateProductPictureResponseDTO;
+import com.rockstock.backend.infrastructure.productPicture.dto.GetProductPicturesResponseDTO;
+import com.rockstock.backend.infrastructure.productPicture.dto.UpdatePicturePositionRequestDTO;
+import com.rockstock.backend.infrastructure.productPicture.dto.UpdatePicturePositionResponseDTO;
 import com.rockstock.backend.infrastructure.productPicture.repository.ProductPictureRepository;
 import com.rockstock.backend.service.cloudinary.CloudinaryService;
 import com.rockstock.backend.service.cloudinary.DeleteCloudinaryService;
@@ -27,8 +31,8 @@ public class ProductPictureService {
     private final DeleteCloudinaryService deleteCloudinaryService;
 
     @Transactional
-    public CreateProductPictureResponseDTO createProductPicture(CreateProductPictureRequestDTO createProductPictureRequestDTO, MultipartFile file) throws IOException {
-        Product product = productRepository.findByIdAndDeletedAtIsNull(createProductPictureRequestDTO.getProductId())
+    public CreateProductPictureResponseDTO createProductPicture(Long productId, MultipartFile file, int position) throws IOException {
+        Product product = productRepository.findByIdAndDeletedAtIsNull(productId)
                 .orElseThrow(() -> new EntityNotFoundException("Product not found"));
 
         long pictureCount = productPictureRepository.countByProductId(product.getId());
@@ -36,7 +40,6 @@ public class ProductPictureService {
             throw new IllegalStateException("A product can only have up to 3 pictures.");
         }
 
-        int position = createProductPictureRequestDTO.getPosition();
         if (position < 1 || position > 3) {
             throw new IllegalArgumentException("Picture position must be between 1 and 3.");
         }
@@ -97,6 +100,13 @@ public class ProductPictureService {
     }
 
     public List<GetProductPicturesResponseDTO> getAllProductPictures(Long productId) {
+        // Check if the product exists
+        boolean productExists = productRepository.existsById(productId);  // Assuming you have a productRepository to check if the product exists
+
+        if (!productExists) {
+            throw new DataNotFoundException("Product with ID " + productId + " not found");
+        }
+
         List<ProductPicture> pictures = productPictureRepository.findAllByProductId(productId);
 
         return pictures.stream()
@@ -109,9 +119,9 @@ public class ProductPictureService {
     }
 
     @Transactional
-    public void deleteProductPicture(Long productId, Long pictureId) {
+    public void deleteProductPicture(Long productId, int position) {
         ProductPicture productPicture = productPictureRepository
-                .findByProductIdAndPictureId(productId, pictureId)
+                .findByProductIdAndPosition(productId, position)
                 .orElseThrow(() -> new EntityNotFoundException("Picture not found for this product"));
 
         try {

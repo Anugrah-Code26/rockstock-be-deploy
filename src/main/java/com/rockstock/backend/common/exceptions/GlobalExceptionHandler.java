@@ -11,6 +11,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.util.Map;
+
 @Log
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -25,9 +27,11 @@ public class GlobalExceptionHandler {
         return ApiResponse.failed("Data integrity violation: " + rootCauseMessage);
     }
 
-    @ExceptionHandler(DuplicateEmailException.class)
-    public ResponseEntity<?> handleDuplicateEmailException(DuplicateEmailException exception) {
-        return ApiResponse.failed("Email already exists");
+    @ExceptionHandler(DuplicateDataException.class)
+    public ResponseEntity<Object> handleDuplicateDataException(DuplicateDataException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                Map.of("status", 409, "error", "Conflict", "message", ex.getMessage())
+        );
     }
 
     @ExceptionHandler(AccessDeniedException.class)

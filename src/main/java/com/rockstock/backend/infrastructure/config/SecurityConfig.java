@@ -94,7 +94,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/stocks**").permitAll()
                         .requestMatchers("/api/v1/pictures/**").permitAll()
                         .requestMatchers("/api/v1/categories/**").permitAll()
-                        .requestMatchers("/api/v1/stocks/**").permitAll()
                         .requestMatchers("/api/v1/mutations/**").permitAll()
                         // Allow static files
                         .anyRequest().authenticated())

@@ -42,7 +42,7 @@ public class ProductCategoryController {
             @PathVariable Long categoryId,
             @ModelAttribute UpdateProductCategoryRequestDTO requestDTO) throws IOException {
 
-        requestDTO.setCategoryId(categoryId); // Set the categoryId in the DTO
+        requestDTO.setCategoryId(categoryId);
 
         CreateProductCategoryResponseDTO responseDTO = productCategoryService.updateProductCategory(requestDTO);
         return ResponseEntity.ok(responseDTO);

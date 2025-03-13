@@ -3,6 +3,7 @@ package com.rockstock.backend.entity.product;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,10 +25,11 @@ public class ProductCategory {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "product_category_id_gen")
     @SequenceGenerator(name = "product_category_id_gen", sequenceName = "product_category_id_seq", allocationSize = 1)
     @Column(name = "product_category_id", nullable = false)
-    private Long Id;
+    private Long id;
 
     @NotNull
-    @Column(name = "category_name", nullable = false)
+    @Size(min = 3, max = 30)
+    @Column(nullable = false, length = 30)
     private String categoryName;
 
     @Column(name = "category_picture")
@@ -62,7 +64,6 @@ public class ProductCategory {
         deletedAt = OffsetDateTime.now();
     }
 
-    // Relationships
     @JsonManagedReference
     @OneToMany(mappedBy = "productCategory", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Product> products = new HashSet<>();

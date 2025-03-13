@@ -22,7 +22,7 @@ public class ProductPicture {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "product_picture_id_gen")
     @SequenceGenerator(name = "product_picture_id_gen", sequenceName = "product_picture_id_seq", schema = "rockstock", allocationSize = 1)
     @Column(name = "product_picture_id", nullable = false)
-    private Long Id;
+    private Long id;
 
     @NotNull
     @Column(name = "product_picture_url", nullable = false)

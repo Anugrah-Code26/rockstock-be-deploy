@@ -14,12 +14,12 @@ public class FilterWarehouseStockSpecification {
         };
     }
 
-    public static Specification<WarehouseStock> hasWarehouseName(String warehouseName) {
+    public static Specification<WarehouseStock> hasWarehouseId(Long warehouseId) {
         return (root, query, criteriaBuilder) -> {
-            if (warehouseName == null || warehouseName.isEmpty()) {
-                return criteriaBuilder.conjunction(); // No filter if warehouseName is null or empty
+            if (warehouseId == null) {
+                return criteriaBuilder.conjunction(); // No filter if warehouseId is null
             }
-            return criteriaBuilder.equal(criteriaBuilder.lower(root.get("warehouse").get("name")), warehouseName.toLowerCase());
+            return criteriaBuilder.equal(root.get("warehouse").get("id"), warehouseId);
         };
     }
 
@@ -27,9 +27,9 @@ public class FilterWarehouseStockSpecification {
         return (root, query, criteriaBuilder) -> criteriaBuilder.isNull(root.get("deletedAt"));
     }
 
-    public static Specification<WarehouseStock> withFilters(String productName, String warehouseName) {
+    public static Specification<WarehouseStock> withFilters(String productName, Long warehouseId) {
         return Specification.where(isDeletedAtNull())
                 .and(hasProductName(productName))
-                .and(hasWarehouseName(warehouseName));
+                .and(hasWarehouseId(warehouseId));
     }
 }

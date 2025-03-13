@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,38 +29,75 @@ public class GetProductService {
     private final ProductRepository productRepository;
     private final WarehouseStockRepository warehouseStockRepository;
 
-    // Get Product by ID - excluding soft-deleted products
     public GetProductResponseDTO getProductById(Long productId) {
         if (productId == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product ID cannot be null");
         }
         return productRepository.findByIdAndDeletedAtIsNull(productId)
-                .map(GetProductResponseDTO::fromProduct)
+                .map(product -> {
+                    BigDecimal totalStock = warehouseStockRepository.getTotalStockByProductId(product.getId());
+                    return GetProductResponseDTO.fromProduct(product, totalStock);
+                })
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
     }
 
-    public Page<GetAllProductResponseDTO> getAllProducts(int page, int size, String name, String category, String sortField, String sortDirection) {
+    private List<Sort.Order> extractSortFields(String sortField, String sortDirection) {
+        List<String> allowedSortFields = Arrays.asList("updatedAt", "productName", "price", "productCategory.id");
+
+        // Split the input sortField by commas to handle multiple fields
+        String[] fields = sortField.split(",");
+
+        // Validate that all sort fields are allowed
+        for (String field : fields) {
+            if (!allowedSortFields.contains(field.trim())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid sort field: " + field);
+            }
+        }
+
+        // Build Sort.Order list for multiple fields
+        List<Sort.Order> orders = new ArrayList<>();
+        for (String field : fields) {
+            orders.add(new Sort.Order(Sort.Direction.fromString(sortDirection), field.trim()));
+        }
+
+        return orders;
+    }
+
+    public Page<GetAllProductResponseDTO> getAllProducts(int page, int size, String name, Long categoryId, String sortField, String sortDirection, ProductStatus[] statuses) {
         if (StringUtils.isBlank(sortField)) {
             sortField = "updatedAt";
         }
 
         sortDirection = (StringUtils.equalsIgnoreCase(sortDirection, "DESC")) ? "DESC" : "ASC";
 
-        List<String> allowedSortFields = Arrays.asList("updatedAt", "productName", "price", "category");
-        if (!allowedSortFields.contains(sortField)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid sort field: " + sortField);
+        if (sortField.equalsIgnoreCase("name")) {
+            sortField = "productName";
         }
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(sortDirection), sortField));
-        Specification<Product> specification = Specification.where(FilterProductSpecifications.hasStatus(ProductStatus.ACTIVE))
+        List<String> validSortFields = Arrays.asList("productName", "price", "updatedAt");
+
+        if (!validSortFields.contains(sortField)) {
+            throw new IllegalArgumentException("Invalid sort field: " + sortField);
+        }
+
+        List<Sort.Order> orders = extractSortFields(sortField, sortDirection);
+        Sort sort = Sort.by(orders);
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Specification<Product> specification = Specification.where(FilterProductSpecifications.hasStatus(statuses))
                 .and((root, query, criteriaBuilder) -> criteriaBuilder.isNull(root.get("deletedAt")));
 
         if (StringUtils.isNotBlank(name)) {
             specification = specification.and(FilterProductSpecifications.hasProductName(name));
         }
 
-        if (StringUtils.isNotBlank(category)) {
-            specification = specification.and(FilterProductSpecifications.hasCategoryName(category));
+        if (categoryId != null) {
+            try {
+                specification = specification.and(FilterProductSpecifications.hasCategoryId(categoryId));
+            } catch (NumberFormatException e) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid category ID format");
+            }
         }
 
         Page<Product> products = productRepository.findAll(specification, pageable);
@@ -74,4 +112,3 @@ public class GetProductService {
         });
     }
 }
-

@@ -4,7 +4,11 @@ import com.rockstock.backend.entity.product.Product;
 import com.rockstock.backend.entity.product.ProductCategory;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -15,9 +19,11 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 public class EditProductRequestDTO {
     @NotBlank
+    @Size(min = 3, max = 30, message = "Product name must be between 3 and 30 characters long")
     private String productName;
 
     @NotBlank
+    @Size(min = 3, max = 100, message = "Details must be between 3 and 100 characters long")
     private String detail;
 
     @NotNull

@@ -10,10 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CreateProductPictureRequestDTO {
     private Long productId;
-
     @NotNull
     private String imageUrl;
-    @NotNull
-    private Integer position;
-
 }

@@ -1,8 +1,10 @@
 package com.rockstock.backend.infrastructure.mutationJournal.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
@@ -11,5 +13,6 @@ public class ProcessRequestDTO {
     @NotNull(message = "Approval status must be provided")
     private boolean approved;
 
+    @Size(min = 3, max = 100)
     private String description;
 }

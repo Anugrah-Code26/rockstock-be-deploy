@@ -52,7 +52,7 @@ public class DeleteProductService {
 
     @Transactional
     public void hardDeleteProduct(Long productId) {
-        Product product = productRepository.findById(productId)
+        Product product = productRepository.findByIdAndDeletedAtIsNull(productId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 
         if (product.getStatus() != ProductStatus.DRAFT) {
@@ -68,7 +68,7 @@ public class DeleteProductService {
 
     private void deleteProductPicturesAndCloudinary(Product product) {
         // Fetch all ProductPictures associated with the product
-        List<ProductPicture> pictures = productPictureRepository.findByProduct(product);
+        List<ProductPicture> pictures = productPictureRepository.findByProductIdAndDeletedAtIsNull(product.getId());
 
         // Loop through each picture and delete from Cloudinary
         for (ProductPicture picture : pictures) {
