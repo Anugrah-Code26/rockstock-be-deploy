@@ -54,10 +54,12 @@ public class WarehouseStockService {
         return new WarehouseStockResponseDTO(
                 savedStock.getId(),
                 savedStock.getStockQuantity(),
+                savedStock.getLockedQuantity(),
                 product.getProductName(),
                 product.getId(),
                 warehouse.getName(),
-                warehouse.getId()
+                warehouse.getId(),
+                null
         );
     }
 
@@ -79,6 +81,7 @@ public class WarehouseStockService {
         }
     }
 
+    @Transactional
     public Page<WarehouseStockResponseDTO> getFilteredWarehouseStocks(String productName, Long warehouseId, Pageable pageable) {
         Specification<WarehouseStock> spec = FilterWarehouseStockSpecification.withFilters(productName, warehouseId);
 
@@ -91,13 +94,16 @@ public class WarehouseStockService {
         return stocks.map(stock -> new WarehouseStockResponseDTO(
                 stock.getId(),
                 stock.getStockQuantity(),
+                stock.getLockedQuantity(),
                 stock.getProduct().getProductName(),
                 stock.getProduct().getId(),
                 stock.getWarehouse().getName(),
-                stock.getWarehouse().getId()
+                stock.getWarehouse().getId(),
+                null
         ));
     }
 
+    @Transactional
     public WarehouseStockResponseDTO getWarehouseStockById(Long stockId) {
         WarehouseStock stock = warehouseStockRepository.findByIdAndDeletedAtIsNull(stockId)
                 .orElseThrow(() -> new EntityNotFoundException("WarehouseStock not found"));
@@ -105,10 +111,12 @@ public class WarehouseStockService {
         return new WarehouseStockResponseDTO(
                 stock.getId(),
                 stock.getStockQuantity(),
+                stock.getLockedQuantity(),
                 stock.getProduct().getProductName(),
                 stock.getProduct().getId(),
                 stock.getWarehouse().getName(),
-                stock.getWarehouse().getId()
+                stock.getWarehouse().getId(),
+                null
         );
     }
 }

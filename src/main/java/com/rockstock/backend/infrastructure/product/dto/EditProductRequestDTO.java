@@ -34,16 +34,4 @@ public class EditProductRequestDTO {
 
     private Long categoryId;
 
-    public Product toProduct(ProductCategory category) {
-        Product product = new Product();
-        product.setProductName(this.productName);
-        product.setDetail(this.detail);
-        product.setPrice(this.price);
-        product.setWeight(this.weight);
-        product.setProductCategory(category);
-        product.setTotalStock(BigDecimal.ZERO);
-        product.setCreatedAt(OffsetDateTime.now());
-        product.setUpdatedAt(OffsetDateTime.now());
-        return product;
-    }
 }

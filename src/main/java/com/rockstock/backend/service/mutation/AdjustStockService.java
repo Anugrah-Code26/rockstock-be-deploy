@@ -58,16 +58,18 @@ public class AdjustStockService {
         }
 
         long previousStock = stock.getStockQuantity();
-        long quantityChange = Math.abs(newStockQuantity - previousStock);
+        long lockedQuantity = stock.getLockedQuantity();
 
-        if (newStockQuantity < 0) {
-            throw new RuntimeException("Stock cannot be negative");
+        if (newStockQuantity < lockedQuantity) {
+            throw new RuntimeException("Stock cannot be adjusted below locked quantity: " + lockedQuantity);
         }
+
+        long quantityChange = Math.abs(newStockQuantity - previousStock);
 
         stock.setStockQuantity(newStockQuantity);
         warehouseStockRepository.save(stock);
 
-        StockAdjustmentType stockAdjustmentType = (quantityChange > 0) ?
+        StockAdjustmentType stockAdjustmentType = (newStockQuantity > previousStock) ?
                 StockAdjustmentType.POSITIVE :
                 StockAdjustmentType.NEGATIVE;
 
