@@ -52,6 +52,7 @@ private RoleRepository roleRepository;
             user = new User();
             user.setEmail(email);
             user.setFullname(fullName);
+            user.setIsVerified(true);
             user.setGoogleImageUrl(pictureUrl);
             UserProvider provider = new UserProvider();
             provider.setProvider("google");
