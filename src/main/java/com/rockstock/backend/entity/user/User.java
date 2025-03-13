@@ -46,7 +46,7 @@ public class User {
     private String email;
 
     @Size(min = 6, message = "Password must be at least 6 characters")
-    @Column(nullable = false)
+    @Column
     private String password;
 
     @Column(name = "profile_picture_url")
@@ -64,7 +64,7 @@ public class User {
     private String gender;
 
     @NotNull
-    @Column(name = "is_admin", nullable = false)
+    @Column(nullable = false)
     private Boolean isAdmin = false;
 
     @NotNull

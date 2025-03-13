@@ -14,6 +14,7 @@ import java.time.OffsetDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+
 public class UserRole {
 
     @Id

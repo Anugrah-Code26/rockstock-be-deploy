@@ -1,6 +1,5 @@
 package com.rockstock.backend.entity.user;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -55,7 +54,6 @@ public class UserProvider {
     }
 
     // Relationships
-    @JsonManagedReference
     @OneToMany(mappedBy = "userProvider", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<User> users = new HashSet<>();
 }
