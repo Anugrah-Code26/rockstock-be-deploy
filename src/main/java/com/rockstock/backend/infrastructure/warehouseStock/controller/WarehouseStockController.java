@@ -86,11 +86,11 @@ public class WarehouseStockController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String productName,
             @RequestParam(required = false) Long warehouseId,
-            @RequestParam(defaultValue = "ASC") String sortOrder) {
+            @RequestParam(defaultValue = "ASC") String sortDirection) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("product.productName").ascending());
 
-        if ("DESC".equalsIgnoreCase(sortOrder)) {
+        if ("DESC".equalsIgnoreCase(sortDirection)) {
             pageable = PageRequest.of(page, size, Sort.by("product.productName").descending());
         }
 
