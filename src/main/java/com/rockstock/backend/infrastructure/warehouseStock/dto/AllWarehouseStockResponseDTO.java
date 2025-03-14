@@ -4,15 +4,12 @@ import com.rockstock.backend.entity.product.ProductPicture;
 import com.rockstock.backend.entity.stock.WarehouseStock;
 import lombok.*;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class WarehouseStockResponseDTO {
+public class AllWarehouseStockResponseDTO {
     private Long stockId;
     private Long stockQuantity;
     private Long lockedQuantity;
@@ -20,7 +17,7 @@ public class WarehouseStockResponseDTO {
     private Long productId;
     private String warehouseName;
     private Long warehouseId;
-    private List<String> productPictureUrls;
+    private String productPictureUrl;
 
     @Getter(AccessLevel.NONE)
     private Long availableQuantity;
@@ -31,8 +28,8 @@ public class WarehouseStockResponseDTO {
         return stock - locked;
     }
 
-    public static WarehouseStockResponseDTO fromWarehouseStock(WarehouseStock stock) {
-        return WarehouseStockResponseDTO.builder()
+    public static AllWarehouseStockResponseDTO fromWarehouseStock(WarehouseStock stock) {
+        return AllWarehouseStockResponseDTO.builder()
                 .stockId(stock.getId())
                 .stockQuantity(stock.getStockQuantity())
                 .lockedQuantity(stock.getLockedQuantity())
@@ -40,10 +37,12 @@ public class WarehouseStockResponseDTO {
                 .productId(stock.getProduct().getId())
                 .warehouseName(stock.getWarehouse().getName())
                 .warehouseId(stock.getWarehouse().getId())
-                .productPictureUrls(
+                .productPictureUrl(
                         stock.getProduct().getProductPictures().stream()
+                                .filter(pic -> pic.getPosition() == 1)
                                 .map(ProductPicture::getProductPictureUrl)
-                                .collect(Collectors.toList())
+                                .findFirst()
+                                .orElse(null)
                 )
                 .build();
     }

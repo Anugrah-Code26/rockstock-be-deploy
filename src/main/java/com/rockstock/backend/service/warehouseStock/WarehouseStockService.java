@@ -5,6 +5,7 @@ import com.rockstock.backend.entity.stock.WarehouseStock;
 import com.rockstock.backend.entity.warehouse.Warehouse;
 import com.rockstock.backend.infrastructure.product.repository.ProductRepository;
 import com.rockstock.backend.infrastructure.warehouse.repository.WarehouseRepository;
+import com.rockstock.backend.infrastructure.warehouseStock.dto.AllWarehouseStockResponseDTO;
 import com.rockstock.backend.infrastructure.warehouseStock.dto.WarehouseStockResponseDTO;
 import com.rockstock.backend.infrastructure.warehouseStock.repository.WarehouseStockRepository;
 import com.rockstock.backend.infrastructure.warehouseStock.specification.FilterWarehouseStockSpecification;
@@ -52,16 +53,7 @@ public class WarehouseStockService {
 
         WarehouseStock savedStock = warehouseStockRepository.save(newStock);
 
-        return new WarehouseStockResponseDTO(
-                savedStock.getId(),
-                savedStock.getStockQuantity(),
-                savedStock.getLockedQuantity(),
-                product.getProductName(),
-                product.getId(),
-                warehouse.getName(),
-                warehouse.getId(),
-                null
-        );
+        return WarehouseStockResponseDTO.fromWarehouseStock(savedStock);
     }
 
     @Transactional
@@ -83,7 +75,7 @@ public class WarehouseStockService {
     }
 
     @Transactional
-    public Page<WarehouseStockResponseDTO> getFilteredWarehouseStocks(String productName, Long warehouseId, Pageable pageable) {
+    public Page<AllWarehouseStockResponseDTO> getFilteredWarehouseStocks(String productName, Long warehouseId, Pageable pageable) {
         Specification<WarehouseStock> spec = FilterWarehouseStockSpecification.withFilters(productName, warehouseId);
 
         Page<WarehouseStock> stocks = warehouseStockRepository.findAll(spec, pageable);
@@ -92,32 +84,15 @@ public class WarehouseStockService {
             throw new EntityNotFoundException("No warehouse stock records found.");
         }
 
-        return stocks.map(stock -> new WarehouseStockResponseDTO(
-                stock.getId(),
-                stock.getStockQuantity(),
-                stock.getLockedQuantity(),
-                stock.getProduct().getProductName(),
-                stock.getProduct().getId(),
-                stock.getWarehouse().getName(),
-                stock.getWarehouse().getId(),
-                null
-        ));
+        return stocks.map(AllWarehouseStockResponseDTO::fromWarehouseStock);
     }
+
 
     @Transactional
     public WarehouseStockResponseDTO getWarehouseStockById(Long stockId) {
         WarehouseStock stock = warehouseStockRepository.findByIdAndDeletedAtIsNull(stockId)
                 .orElseThrow(() -> new EntityNotFoundException("WarehouseStock not found"));
 
-        return new WarehouseStockResponseDTO(
-                stock.getId(),
-                stock.getStockQuantity(),
-                stock.getLockedQuantity(),
-                stock.getProduct().getProductName(),
-                stock.getProduct().getId(),
-                stock.getWarehouse().getName(),
-                stock.getWarehouse().getId(),
-                null
-        );
+        return WarehouseStockResponseDTO.fromWarehouseStock(stock);
     }
 }

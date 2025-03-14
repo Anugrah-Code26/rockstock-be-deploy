@@ -1,5 +1,6 @@
 package com.rockstock.backend.infrastructure.warehouseStock.controller;
 
+import com.rockstock.backend.infrastructure.warehouseStock.dto.AllWarehouseStockResponseDTO;
 import com.rockstock.backend.infrastructure.warehouseStock.dto.WarehouseStockResponseDTO;
 import com.rockstock.backend.service.warehouseStock.WarehouseStockService;
 import jakarta.persistence.EntityNotFoundException;
@@ -94,7 +95,7 @@ public class WarehouseStockController {
             pageable = PageRequest.of(page, size, Sort.by("product.productName").descending());
         }
 
-        Page<WarehouseStockResponseDTO> warehouseStocks = warehouseStockService.getFilteredWarehouseStocks(productName, warehouseId, pageable);
+        Page<AllWarehouseStockResponseDTO> warehouseStocks = warehouseStockService.getFilteredWarehouseStocks(productName, warehouseId, pageable);
 
         if (warehouseStocks.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
