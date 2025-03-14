@@ -50,6 +50,7 @@ public class AdjustStockService {
                     newStock.setProduct(product);
                     newStock.setWarehouse(warehouse);
                     newStock.setStockQuantity(0L);
+                    newStock.setLockedQuantity(0L);
                     return warehouseStockRepository.save(newStock);
                 });
 

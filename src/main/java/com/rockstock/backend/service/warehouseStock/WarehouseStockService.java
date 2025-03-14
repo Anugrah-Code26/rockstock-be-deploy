@@ -48,6 +48,7 @@ public class WarehouseStockService {
         newStock.setProduct(product);
         newStock.setWarehouse(warehouse);
         newStock.setStockQuantity(0L);
+        newStock.setLockedQuantity(0L);
 
         WarehouseStock savedStock = warehouseStockRepository.save(newStock);
 

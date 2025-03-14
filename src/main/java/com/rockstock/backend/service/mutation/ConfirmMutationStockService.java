@@ -123,6 +123,7 @@ public class ConfirmMutationStockService {
             newStock.setProduct(destinationMutationJournal.getWarehouseStock().getProduct());
             newStock.setWarehouse(destinationMutationJournal.getDestinationWarehouse());
             newStock.setStockQuantity(0L);
+            newStock.setLockedQuantity(0L);
             return warehouseStockRepository.save(newStock);
         });
     }
@@ -136,6 +137,7 @@ public class ConfirmMutationStockService {
             newStock.setProduct(originMutationJournal.getWarehouseStock().getProduct());
             newStock.setWarehouse(originMutationJournal.getOriginWarehouse());
             newStock.setStockQuantity(0L);
+            newStock.setLockedQuantity(0L);
             return warehouseStockRepository.save(newStock);
         });
     }
