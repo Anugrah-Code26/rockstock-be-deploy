@@ -21,6 +21,8 @@ public class WarehouseStockResponseDTO {
     private Long availableQuantity;
 
     public Long getAvailableQuantity() {
-        return stockQuantity - lockedQuantity; // Compute dynamically
+        long stock = (stockQuantity != null ? stockQuantity : 0L);
+        long locked = (lockedQuantity != null ? lockedQuantity : 0L);
+        return stock - locked;
     }
 }
