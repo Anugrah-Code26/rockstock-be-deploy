@@ -110,6 +110,7 @@ public class UpdateProductService {
                 warehouseStock.setProduct(product);
                 warehouseStock.setWarehouse(warehouse);
                 warehouseStock.setStockQuantity(0L);
+                warehouseStock.setLockedQuantity(0L);
                 warehouseStocks.add(warehouseStock);
             }
         }
