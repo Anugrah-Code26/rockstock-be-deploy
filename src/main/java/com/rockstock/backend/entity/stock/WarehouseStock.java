@@ -32,7 +32,7 @@ public class WarehouseStock {
     private Long stockQuantity;
 
     @Column(name = "locked_quantity")
-    private Long lockedQuantity;
+    private Long lockedQuantity = 0L;
 
     @Column(name = "deleted_at")
     private OffsetDateTime deletedAt;
