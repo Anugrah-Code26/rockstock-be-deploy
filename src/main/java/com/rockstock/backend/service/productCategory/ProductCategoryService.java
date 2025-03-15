@@ -19,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -108,6 +109,10 @@ public class ProductCategoryService {
 
         productCategory.setDeletedAt(null);
         productCategoryRepository.save(productCategory);
+    }
+
+    public List<ProductCategory> getAllListProductCategories() {
+        return productCategoryRepository.findAll();
     }
 
     public Page<HomeProductCategoryDTO> getAllCategories(String categoryName, Pageable pageable) {

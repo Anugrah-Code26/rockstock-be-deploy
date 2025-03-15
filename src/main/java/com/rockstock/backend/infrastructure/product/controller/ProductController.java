@@ -1,10 +1,12 @@
 package com.rockstock.backend.infrastructure.product.controller;
 
+import com.rockstock.backend.common.response.ApiResponse;
 import com.rockstock.backend.entity.product.ProductStatus;
 import com.rockstock.backend.infrastructure.product.dto.*;
 import com.rockstock.backend.service.product.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -53,6 +55,12 @@ public class ProductController {
 
         EditProductResponseDTO response = editProductService.editProduct(id, editProductRequestDTO);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/all")
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<?> getAllListProducts() {
+        return ApiResponse.success(HttpStatus.OK.value(), "Get all products success!",getProductService.getAllListProducts());
     }
 
     @GetMapping("/{id}")

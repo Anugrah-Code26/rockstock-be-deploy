@@ -29,6 +29,10 @@ public class GetProductService {
     private final ProductRepository productRepository;
     private final WarehouseStockRepository warehouseStockRepository;
 
+    public List<Product> getAllListProducts() {
+        return productRepository.findAll();
+    }
+
     public GetProductResponseDTO getProductById(Long productId) {
         if (productId == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product ID cannot be null");

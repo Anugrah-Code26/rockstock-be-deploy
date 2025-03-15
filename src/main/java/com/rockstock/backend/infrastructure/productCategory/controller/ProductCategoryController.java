@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -60,6 +61,12 @@ public class ProductCategoryController {
         return ResponseEntity.ok("Category restored successfully");
     }
 
+    @GetMapping("/all")
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<?> getAllListProductCategories() {
+        return ApiResponse.success(HttpStatus.OK.value(), "Get all product categories success!",productCategoryService.getAllListProductCategories());
+    }
+
     @GetMapping
     public ResponseEntity<?> getAllCategories(
             @RequestParam(defaultValue = "0") int page,
@@ -76,7 +83,6 @@ public class ProductCategoryController {
 
         return ResponseEntity.ok(Map.of("statusCode", 200, "message", "Fetched categories", "success", true, "data", categories));
     }
-
 
     @GetMapping("/{categoryId}")
     public ResponseEntity<ApiResponse<GetProductCategoryResponseDTO>> getCategoryById(

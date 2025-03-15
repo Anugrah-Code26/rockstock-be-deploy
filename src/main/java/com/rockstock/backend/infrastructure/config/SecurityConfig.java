@@ -83,6 +83,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/warehouses/**").permitAll()
                         .requestMatchers("/api/v1/warehouse-admins/**").permitAll()
 
+                        .requestMatchers("/api/reports/sales").hasAnyRole("Super Admin", "Warehouse Admin")
+
                         // private endpoints
                         .requestMatchers("/test/**").permitAll() // Allow test API access
                         .requestMatchers("/static/**").permitAll() // Allow email template
