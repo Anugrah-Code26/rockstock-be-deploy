@@ -21,6 +21,7 @@ public class GetOrderResponseDTO {
     private BigDecimal deliveryCost;
     private BigDecimal totalPrice;
     private BigDecimal totalPayment;
+    private String paymentRedirectUrl;
     private String formattedCreatedAt;
     private String formattedUpdatedAt;
     private Long userId;
@@ -40,6 +41,7 @@ public class GetOrderResponseDTO {
         this.deliveryCost = order.getDeliveryCost();
         this.totalPrice = order.getTotalPrice();
         this.totalPayment = order.getTotalPayment();
+        this.paymentRedirectUrl = order.getPaymentRedirectUrl();
         this.formattedCreatedAt = formatDate(order.getCreatedAt());
         this.formattedUpdatedAt = formatDate(order.getUpdatedAt());
         this.userId = order.getUser().getId();
