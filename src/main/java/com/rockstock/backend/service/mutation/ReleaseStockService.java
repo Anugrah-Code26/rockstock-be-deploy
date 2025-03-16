@@ -28,37 +28,36 @@ public class ReleaseStockService {
 
         private static final String LOCK_KEY = "lock:warehouseStock:";
 
-        public void releaseLockedStockForOrder(Long orderId) {
-            orderRepository.findById(orderId)
-                    .orElseThrow(() -> new RuntimeException("Order not found"));
+    public void releaseLockedStockForOrder(Long orderId) {
+        orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
 
-            List<OrderItem> orderItems = orderItemRepository.findAllByOrderId(orderId);
+        List<OrderItem> orderItems = orderItemRepository.findAllByOrderId(orderId);
 
-            for (OrderItem orderItem : orderItems) {
-                Product product = orderItem.getProduct();
+        for (OrderItem orderItem : orderItems) {
+            Product product = orderItem.getProduct();
+            List<Warehouse> warehouses = warehouseRepository.findAll();
 
-                List<Warehouse> warehouses = warehouseRepository.findAll();
+            for (Warehouse warehouse : warehouses) {
+                Optional<WarehouseStock> stockOpt = warehouseStockRepository.findByProductAndWarehouse(product, warehouse);
+                if (stockOpt.isEmpty()) {
+                    continue;
+                }
+                WarehouseStock stock = stockOpt.get();
+                String orderLockKey = LOCK_KEY + stock.getWarehouse().getId() + ":" + stock.getProduct().getId() + ":" + orderId;
 
-                for (Warehouse warehouse : warehouses) {
-                    Optional<WarehouseStock> stockOpt = warehouseStockRepository.findByProductAndWarehouse(product, warehouse);
-                    if (stockOpt.isEmpty()) {
-                        continue;
-                    }
-                    WarehouseStock stock = stockOpt.get();
-                    String orderLockKey = LOCK_KEY + stock.getId() + ":" + orderId;
-                    String lockedQtyStr = redisTemplate.opsForValue().get(orderLockKey);
-                    if (lockedQtyStr != null) {
-                        long lockedQty = Long.parseLong(lockedQtyStr);
-                        redisTemplate.delete(orderLockKey);
+                System.out.println("Checking Redis key: " + orderLockKey);
+                String lockedQtyStr = redisTemplate.opsForValue().get(orderLockKey);
+                if (lockedQtyStr != null) {
+                    long lockedQty = Long.parseLong(lockedQtyStr);
+                    redisTemplate.delete(orderLockKey);
 
-                        long newLockedQty = stock.getLockedQuantity() - lockedQty;
-                        if (newLockedQty < 0) {
-                            newLockedQty = 0;
-                        }
-                        stock.setLockedQuantity(newLockedQty);
-                        warehouseStockRepository.save(stock);
-                    }
+                    WarehouseStock latestStock = warehouseStockRepository.findById(stock.getId()).orElse(stock);
+                    long newLockedQty = Math.max(latestStock.getLockedQuantity() - lockedQty, 0);
+                    latestStock.setLockedQuantity(newLockedQty);
+                    warehouseStockRepository.save(latestStock);
                 }
             }
         }
     }
+}

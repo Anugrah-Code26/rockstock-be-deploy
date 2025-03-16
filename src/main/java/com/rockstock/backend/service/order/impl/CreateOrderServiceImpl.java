@@ -100,7 +100,7 @@ public class CreateOrderServiceImpl implements CreateOrderService {
         // Save order again with order code & payment method
         orderRepository.save(savedOrder);
 
-//        lockStockService.lockStockForOrder(savedOrder.getId(), cart);
+        lockStockService.lockStockForOrder(savedOrder.getId(), cart);
 
         // Save order items for history
         createOrderItemService.createOrderItem(savedOrder.getId());

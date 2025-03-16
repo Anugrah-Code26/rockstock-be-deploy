@@ -46,28 +46,18 @@ public class LockStockService {
             List<Warehouse> sortedWarehouses = findWarehousesSortedByDistance(destinationWarehouse);
 
             for (Warehouse warehouse : sortedWarehouses) {
-                while (requiredQty > 0) {
-                    WarehouseStock warehouseStock = findAvailableStock(product, warehouse);
+                if (requiredQty <= 0) break; // Exit if stock is fully locked
 
-                    if (warehouseStock != null) {
-                        long availableStock = warehouseStock.getStockQuantity() - warehouseStock.getLockedQuantity();
+                WarehouseStock warehouseStock = findAvailableStock(product, warehouse);
 
-                        if (availableStock >= requiredQty) {
-                            lockStockInWarehouse(warehouseStock, requiredQty, orderId);
-                            requiredQty = 0;
-                        } else {
-                            lockStockInWarehouse(warehouseStock, availableStock, orderId);
-                            requiredQty -= availableStock;
-                        }
+                if (warehouseStock != null) {
+                    long availableStock = warehouseStock.getStockQuantity() - warehouseStock.getLockedQuantity();
+
+                    if (availableStock > 0) {
+                        long lockedQty = Math.min(availableStock, requiredQty);
+                        lockStockInWarehouse(warehouseStock, orderId, lockedQty);
+                        requiredQty -= lockedQty;
                     }
-
-                    if (requiredQty > 0) {
-                        break;
-                    }
-                }
-
-                if (requiredQty == 0) {
-                    break;
                 }
             }
 
@@ -88,8 +78,7 @@ public class LockStockService {
 
         warehouseStockRepository.save(warehouseStock);
 
-        String orderLockKey = LOCK_KEY + warehouseStock.getId() + ":" + orderId;
-
+        String orderLockKey = LOCK_KEY + warehouseStock.getWarehouse().getId() + ":" + warehouseStock.getProduct().getId() + ":" + orderId;
         redisTemplate.opsForValue().set(orderLockKey, String.valueOf(qty), 1, TimeUnit.HOURS);
     }
 

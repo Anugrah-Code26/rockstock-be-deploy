@@ -47,37 +47,43 @@ public class DestinationShipmentService {
             String lockedQtyStr = redisTemplate.opsForValue().get(destinationOrderLockKey);
             long lockedQty = (lockedQtyStr != null) ? Long.parseLong(lockedQtyStr) : 0L;
 
-            if (lockedQty != requiredQty) {
-                throw new RuntimeException("Locked quantity (" + lockedQty + ") for product "
-                        + product.getProductName() + " does not match required quantity ("
-                        + requiredQty + ") for order " + order.getOrderCode());
+            if (lockedQty < requiredQty) {
+                throw new RuntimeException("Insufficient locked quantity (" + lockedQty + ") for product "
+                        + product.getProductName() + " in order " + order.getOrderCode());
             }
 
-            long destinationPrevStock = destinationStock.getStockQuantity();
-            long destinationPrevLocked = destinationStock.getLockedQuantity();
+            synchronized (this) { // Prevent race conditions
+                long destinationPrevStock = destinationStock.getStockQuantity();
+                long destinationPrevLocked = destinationStock.getLockedQuantity();
 
-            long destinationNewStock = destinationPrevStock - requiredQty;
-            long destinationNewLocked = destinationPrevLocked - requiredQty;
-            destinationStock.setStockQuantity(destinationNewStock);
-            destinationStock.setLockedQuantity(destinationNewLocked);
-            warehouseStockRepository.save(destinationStock);
+                long destinationNewStock = destinationPrevStock - requiredQty;
+                long destinationNewLocked = destinationPrevLocked - requiredQty;
 
-            redisTemplate.delete(destinationOrderLockKey);
+                if (destinationNewStock < 0 || destinationNewLocked < 0) {
+                    throw new RuntimeException("Stock inconsistency detected during shipping for " + product.getProductName());
+                }
 
-            MutationJournal shipmentJournal = new MutationJournal();
-            shipmentJournal.setMutationQuantity(requiredQty);
-            shipmentJournal.setPreviousStockQuantity(destinationPrevStock);
-            shipmentJournal.setNewStockQuantity(destinationNewStock);
-            shipmentJournal.setDescription("Destination warehouse " + destinationWarehouse.getName() +
-                    " shipped " + requiredQty + " units of " + product.getProductName() +
-                    " to customer for order " + order.getOrderCode());
-            shipmentJournal.setWarehouseStock(destinationStock);
-            shipmentJournal.setOriginWarehouse(destinationWarehouse);
-            shipmentJournal.setDestinationWarehouse(null);
-            shipmentJournal.setStockChangeType(StockChangeType.SALES_DISPATCHED);
-            shipmentJournal.setStockAdjustmentType(StockAdjustmentType.NEGATIVE);
-            shipmentJournal.setMutationStatus(MutationStatus.ON_DELIVERY);
-            mutationJournalRepository.save(shipmentJournal);
+                destinationStock.setStockQuantity(destinationNewStock);
+                destinationStock.setLockedQuantity(destinationNewLocked);
+                warehouseStockRepository.save(destinationStock);
+
+                redisTemplate.delete(destinationOrderLockKey);
+
+                MutationJournal shipmentJournal = new MutationJournal();
+                shipmentJournal.setMutationQuantity(requiredQty);
+                shipmentJournal.setPreviousStockQuantity(destinationPrevStock);
+                shipmentJournal.setNewStockQuantity(destinationNewStock);
+                shipmentJournal.setDescription("Destination warehouse " + destinationWarehouse.getName() +
+                        " shipped " + requiredQty + " units of " + product.getProductName() +
+                        " to customer for order " + order.getOrderCode());
+                shipmentJournal.setWarehouseStock(destinationStock);
+                shipmentJournal.setOriginWarehouse(destinationWarehouse);
+                shipmentJournal.setDestinationWarehouse(null);
+                shipmentJournal.setStockChangeType(StockChangeType.SALES_DISPATCHED);
+                shipmentJournal.setStockAdjustmentType(StockAdjustmentType.NEGATIVE);
+                shipmentJournal.setMutationStatus(MutationStatus.ON_DELIVERY);
+                mutationJournalRepository.save(shipmentJournal);
+            }
         }
     }
 }
