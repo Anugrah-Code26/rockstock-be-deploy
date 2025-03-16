@@ -1,6 +1,7 @@
 package com.rockstock.backend.infrastructure.warehouseStock.controller;
 
 import com.rockstock.backend.infrastructure.warehouseStock.dto.AllWarehouseStockResponseDTO;
+import com.rockstock.backend.infrastructure.warehouseStock.dto.WarehouseStockRequestDTO;
 import com.rockstock.backend.infrastructure.warehouseStock.dto.WarehouseStockResponseDTO;
 import com.rockstock.backend.service.warehouseStock.WarehouseStockService;
 import jakarta.persistence.EntityNotFoundException;
@@ -23,35 +24,25 @@ public class WarehouseStockController {
     private final WarehouseStockService warehouseStockService;
 
     @PostMapping("/create")
-    public ResponseEntity<?> createWarehouseStock(
-            @RequestParam Long productId,
-            @RequestParam Long warehouseId) {
-
+    public ResponseEntity<?> createWarehouseStock(@RequestBody WarehouseStockRequestDTO requestDTO) {
         try {
-            // Call service to create warehouse stock
-            WarehouseStockResponseDTO response = warehouseStockService.createWarehouseStock(productId, warehouseId);
+            WarehouseStockResponseDTO response = warehouseStockService.createWarehouseStock(requestDTO);
 
-            // Return success response with CREATED status
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
         } catch (IllegalStateException e) {
-            // If warehouse stock already exists
             return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
                     "statusCode", 409,
                     "message", e.getMessage(),
                     "success", false
             ));
-
         } catch (EntityNotFoundException e) {
-            // If product or warehouse is not found
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
                     "statusCode", 404,
                     "message", e.getMessage(),
                     "success", false
             ));
-
         } catch (Exception e) {
-            // Catch any unexpected errors
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
                     "statusCode", 500,
                     "message", "An unexpected error occurred",
@@ -59,7 +50,6 @@ public class WarehouseStockController {
             ));
         }
     }
-
 
     @PatchMapping("/{stockId}/delete")
     public ResponseEntity<String> softDeleteWarehouseStock(@PathVariable Long stockId) {

@@ -6,6 +6,7 @@ import com.rockstock.backend.entity.warehouse.Warehouse;
 import com.rockstock.backend.infrastructure.product.repository.ProductRepository;
 import com.rockstock.backend.infrastructure.warehouse.repository.WarehouseRepository;
 import com.rockstock.backend.infrastructure.warehouseStock.dto.AllWarehouseStockResponseDTO;
+import com.rockstock.backend.infrastructure.warehouseStock.dto.WarehouseStockRequestDTO;
 import com.rockstock.backend.infrastructure.warehouseStock.dto.WarehouseStockResponseDTO;
 import com.rockstock.backend.infrastructure.warehouseStock.repository.WarehouseStockRepository;
 import com.rockstock.backend.infrastructure.warehouseStock.specification.FilterWarehouseStockSpecification;
@@ -29,22 +30,21 @@ public class WarehouseStockService {
     private final WarehouseStockRepository warehouseStockRepository;
 
     @Transactional
-    public WarehouseStockResponseDTO createWarehouseStock(Long productId, Long warehouseId) {
-        // Check if product exists
+    public WarehouseStockResponseDTO createWarehouseStock(WarehouseStockRequestDTO requestDTO) {
+        Long productId = requestDTO.getProductId();
+        Long warehouseId = requestDTO.getWarehouseId();
+
         Product product = productRepository.findByIdAndDeletedAtIsNull(productId)
                 .orElseThrow(() -> new EntityNotFoundException("Product not found"));
 
-        // Check if warehouse exists
         Warehouse warehouse = warehouseRepository.findByIdAndDeletedAtIsNull(warehouseId)
                 .orElseThrow(() -> new EntityNotFoundException("Warehouse not found"));
 
-        // Check if WarehouseStock already exists (excluding soft-deleted records)
         Optional<WarehouseStock> existingStock = warehouseStockRepository.findByProductAndWarehouse(product, warehouse);
         if (existingStock.isPresent()) {
-            throw new IllegalStateException("WarehouseStock already exists for this product in the "+ warehouse.getName());
+            throw new IllegalStateException("WarehouseStock already exists for this product in " + warehouse.getName());
         }
 
-        // Create new WarehouseStock with stockQuantity = 0
         WarehouseStock newStock = new WarehouseStock();
         newStock.setProduct(product);
         newStock.setWarehouse(warehouse);

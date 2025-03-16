@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,13 +34,13 @@ public class AdminService {
         this.passwordEncoder = passwordEncoder;
     }
     @Transactional
-    public AdminResponseDTO createAdmin(AdminCreateRequestDTO request, String roleName) {
+    public AdminResponseDTO createAdmin(AdminCreateRequestDTO request) {
 
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email already in use");
         }
 
-        Role role = roleRepository.findByName("Warehouse_Admin").get();
+        Optional<Role> role = roleRepository.findByName("Warehouse Admin");
 
 
         User admin = new User();
@@ -51,16 +52,16 @@ public class AdminService {
         User savedUser = userRepository.save(admin);
         UserRole userRole = new UserRole();
         userRole.setUser(savedUser);
-        userRole.setRole(role);
+        userRole.setRole(role.get());
         userRoleRepository.save(userRole);
-        return new AdminResponseDTO(admin.getId(), admin.getEmail(), role.getName(), admin.getFullname());
+        return new AdminResponseDTO(admin.getId(), admin.getEmail(), role.get().getName(), admin.getFullname());
     }
 
 
     public List<AdminResponseDTO> getAllAdmins() {
         List<User> admins = userRepository.findAll().stream()
                 .filter(user -> user.getRoles().stream()
-                        .anyMatch(role -> role.getName().equals("ADMIN") || role.getName().equals("Warehouse_Admin")))
+                        .anyMatch(role -> role.getName().equals("Warehouse Admin")))
                 .collect(Collectors.toList());
 
         return admins.stream()
@@ -111,7 +112,7 @@ public class AdminService {
 
 
         boolean isSuperAdmin = requester.getRoles().stream()
-                .anyMatch(role -> role.getName().equals("SUPER_ADMIN"));
+                .anyMatch(role -> role.getName().equals("Super Admin"));
 
         if (!isSuperAdmin) {
             throw new RuntimeException("Unauthorized: Only Super Admin can delete admins");

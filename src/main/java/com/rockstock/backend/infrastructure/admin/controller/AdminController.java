@@ -21,11 +21,9 @@ public class AdminController {
 
     @PostMapping
     public ResponseEntity<AdminResponseDTO> createAdmin(
-            @RequestBody AdminCreateRequestDTO request,
-            @RequestParam(required = false) String role) {
+            @RequestBody AdminCreateRequestDTO request) {
 
-        System.out.println("Received role: " + role);
-        return ResponseEntity.ok(adminService.createAdmin(request,""));
+        return ResponseEntity.ok(adminService.createAdmin(request));
     }
 
 
