@@ -82,7 +82,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/verify-email").permitAll()
                         .requestMatchers("/api/v1/payments/webhook").permitAll()
                         .requestMatchers("/api/v1/warehouses/**").permitAll()
+                        .requestMatchers("/api/v1/warehouses/warehouse-admin/**").permitAll()
                         .requestMatchers("/api/v1/warehouse-admins/**").permitAll()
+                        .requestMatchers("/api/v1/warehouse-admins/assign").permitAll()
 
                         .requestMatchers("/api/reports/sales").hasAnyRole("Super Admin", "Warehouse Admin")
 
