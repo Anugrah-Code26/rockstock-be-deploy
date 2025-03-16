@@ -29,8 +29,6 @@ public class LockStockService {
     private final OrderRepository orderRepository;
     private final RedisTemplate<String, String> redisTemplate;
 
-    private static final String LOCK_KEY = "lock:warehouseStock:";
-
     @Transactional
     public void lockStockForOrder(Long orderId, Cart cart) {
         Order order = orderRepository.findById(orderId).orElseThrow(() ->
@@ -80,16 +78,10 @@ public class LockStockService {
         warehouseStock.setLockedQuantity(newLockedQty);
         warehouseStockRepository.save(warehouseStock);
 
-        String orderLockKey = String.format("lock:warehouseStock:%d:%d:%d",
-                warehouseStock.getWarehouse().getId(),
-                warehouseStock.getProduct().getId(),
-                orderId);
-
-        System.out.println("Saving lock in Redis: " + orderLockKey + " -> " + qty);
+        String orderLockKey = String.format("o:%d:p:%d", orderId, warehouseStock.getProduct().getId());
 
         redisTemplate.opsForValue().set(orderLockKey, String.valueOf(qty), 1, TimeUnit.HOURS);
     }
-
 
     private List<Warehouse> findWarehousesSortedByDistance(Warehouse destinationWarehouse) {
         if (destinationWarehouse == null || destinationWarehouse.getLatitude() == null || destinationWarehouse.getLongitude() == null) {
