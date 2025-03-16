@@ -58,91 +58,95 @@ public class AutomaticMutationService {
                 WarehouseStock senderStock = senderStockOpt.get();
                 String orderLockKey = LOCK_KEY + senderStock.getWarehouse().getId() + ":" + senderStock.getProduct().getId() + ":" + orderId;
 
-                // Acquire lock to prevent race conditions
+                // Attempt to acquire lock (prevent race conditions)
                 Boolean locked = redisTemplate.opsForValue().setIfAbsent(orderLockKey, "LOCKED", 10, TimeUnit.MINUTES);
                 if (Boolean.FALSE.equals(locked)) {
-                    throw new RuntimeException("Stock transfer in progress for product " + product.getProductName());
+                    continue; // Skip if another process is transferring this stock
                 }
 
-                String lockedQtyStr = redisTemplate.opsForValue().get(orderLockKey);
-                long lockedQty = (lockedQtyStr != null) ? Long.parseLong(lockedQtyStr) : 0L;
-                if (lockedQty <= 0) continue;
+                try {
+                    String lockedQtyStr = redisTemplate.opsForValue().get(orderLockKey);
+                    long lockedQty = (lockedQtyStr != null) ? Long.parseLong(lockedQtyStr) : 0L;
+                    if (lockedQty <= 0) continue;
 
-                long quantityToTransfer = Math.min(requiredQty, lockedQty);
-                long senderPrevStock = senderStock.getStockQuantity();
-                long senderNewStock = senderPrevStock - quantityToTransfer;
+                    long quantityToTransfer = Math.min(requiredQty, lockedQty);
+                    long senderPrevStock = senderStock.getStockQuantity();
+                    long senderNewStock = senderPrevStock - quantityToTransfer;
 
-                // Fetch latest stock data to prevent outdated updates
-                WarehouseStock latestSenderStock = warehouseStockRepository.findById(senderStock.getId()).orElse(senderStock);
-                long newLockedQty = Math.max(latestSenderStock.getLockedQuantity() - quantityToTransfer, 0);
-                latestSenderStock.setLockedQuantity(newLockedQty);
-                latestSenderStock.setStockQuantity(senderNewStock);
-                warehouseStockRepository.save(latestSenderStock);
+                    // Fetch latest stock data to prevent stale updates
+                    WarehouseStock latestSenderStock = warehouseStockRepository.findById(senderStock.getId()).orElse(senderStock);
+                    long newLockedQty = Math.max(latestSenderStock.getLockedQuantity() - quantityToTransfer, 0);
+                    latestSenderStock.setLockedQuantity(newLockedQty);
+                    latestSenderStock.setStockQuantity(senderNewStock);
+                    warehouseStockRepository.save(latestSenderStock);
 
-                // Update Redis lock key
-                long remainingOrderLock = lockedQty - quantityToTransfer;
-                if (remainingOrderLock <= 0) {
-                    redisTemplate.delete(orderLockKey);
-                } else {
-                    redisTemplate.opsForValue().set(orderLockKey, String.valueOf(remainingOrderLock), 1, TimeUnit.HOURS);
+                    // Update Redis lock key
+                    long remainingOrderLock = lockedQty - quantityToTransfer;
+                    if (remainingOrderLock <= 0) {
+                        redisTemplate.delete(orderLockKey);
+                    } else {
+                        redisTemplate.opsForValue().set(orderLockKey, String.valueOf(remainingOrderLock), 1, TimeUnit.HOURS);
+                    }
+
+                    // Create sender journal entry
+                    MutationJournal senderJournal = new MutationJournal();
+                    senderJournal.setMutationQuantity(quantityToTransfer);
+                    senderJournal.setPreviousStockQuantity(senderPrevStock);
+                    senderJournal.setNewStockQuantity(senderNewStock);
+                    senderJournal.setDescription("Automatic mutation: transferred " + quantityToTransfer
+                            + " units of " + product.getProductName() + " from warehouse " + senderWarehouse.getName());
+                    senderJournal.setWarehouseStock(senderStock);
+                    senderJournal.setOriginWarehouse(senderWarehouse);
+                    senderJournal.setDestinationWarehouse(destinationWarehouse);
+                    senderJournal.setStockChangeType(StockChangeType.TRANSFER);
+                    senderJournal.setStockAdjustmentType(StockAdjustmentType.NEGATIVE);
+                    senderJournal.setMutationStatus(MutationStatus.COMPLETED);
+
+                    // Update receiver stock
+                    WarehouseStock receiverStock = warehouseStockRepository.findByProductAndWarehouse(product, destinationWarehouse)
+                            .orElseGet(() -> {
+                                WarehouseStock newStock = new WarehouseStock();
+                                newStock.setProduct(product);
+                                newStock.setWarehouse(destinationWarehouse);
+                                newStock.setStockQuantity(0L);
+                                newStock.setLockedQuantity(0L);
+                                return newStock;
+                            });
+
+                    long receiverPrevStock = receiverStock.getStockQuantity();
+                    long receiverNewStock = receiverPrevStock + quantityToTransfer;
+                    receiverStock.setStockQuantity(receiverNewStock);
+                    warehouseStockRepository.save(receiverStock);
+
+                    // Update Redis lock for destination warehouse
+                    String destinationOrderLockKey = LOCK_KEY + receiverStock.getWarehouse().getId() + ":" + receiverStock.getProduct().getId() + ":" + orderId;
+                    String destinationLockedQtyStr = redisTemplate.opsForValue().get(destinationOrderLockKey);
+                    long destinationOrderLockedQty = (destinationLockedQtyStr != null) ? Long.parseLong(destinationLockedQtyStr) : 0L;
+                    long newDestinationLock = destinationOrderLockedQty + quantityToTransfer;
+                    redisTemplate.opsForValue().set(destinationOrderLockKey, String.valueOf(newDestinationLock), 1, TimeUnit.HOURS);
+
+                    // Create receiver journal entry
+                    MutationJournal receiverJournal = new MutationJournal();
+                    receiverJournal.setMutationQuantity(quantityToTransfer);
+                    receiverJournal.setPreviousStockQuantity(receiverPrevStock);
+                    receiverJournal.setNewStockQuantity(receiverNewStock);
+                    receiverJournal.setDescription("Automatic mutation: received " + quantityToTransfer
+                            + " units of " + product.getProductName() + " in warehouse " + destinationWarehouse.getName());
+                    receiverJournal.setWarehouseStock(receiverStock);
+                    receiverJournal.setOriginWarehouse(senderWarehouse);
+                    receiverJournal.setDestinationWarehouse(destinationWarehouse);
+                    receiverJournal.setStockChangeType(StockChangeType.TRANSFER);
+                    receiverJournal.setStockAdjustmentType(StockAdjustmentType.POSITIVE);
+                    receiverJournal.setMutationStatus(MutationStatus.COMPLETED);
+                    receiverJournal.setRelatedJournal(senderJournal);
+
+                    // Save both journals in a single transaction
+                    mutationJournalRepository.saveAll(List.of(senderJournal, receiverJournal));
+
+                    requiredQty -= quantityToTransfer;
+                } finally {
+                    redisTemplate.delete(orderLockKey); // Ensure lock is always released
                 }
-
-                // Create sender journal entry
-                MutationJournal senderJournal = new MutationJournal();
-                senderJournal.setMutationQuantity(quantityToTransfer);
-                senderJournal.setPreviousStockQuantity(senderPrevStock);
-                senderJournal.setNewStockQuantity(senderNewStock);
-                senderJournal.setDescription("Automatic mutation: transferred " + quantityToTransfer
-                        + " units of " + product.getProductName() + " from warehouse " + senderWarehouse.getName());
-                senderJournal.setWarehouseStock(senderStock);
-                senderJournal.setOriginWarehouse(senderWarehouse);
-                senderJournal.setDestinationWarehouse(destinationWarehouse);
-                senderJournal.setStockChangeType(StockChangeType.TRANSFER);
-                senderJournal.setStockAdjustmentType(StockAdjustmentType.NEGATIVE);
-                senderJournal.setMutationStatus(MutationStatus.COMPLETED);
-
-                // Update receiver stock
-                WarehouseStock receiverStock = warehouseStockRepository.findByProductAndWarehouse(product, destinationWarehouse)
-                        .orElseGet(() -> {
-                            WarehouseStock newStock = new WarehouseStock();
-                            newStock.setProduct(product);
-                            newStock.setWarehouse(destinationWarehouse);
-                            newStock.setStockQuantity(0L);
-                            newStock.setLockedQuantity(0L);
-                            return newStock;
-                        });
-
-                long receiverPrevStock = receiverStock.getStockQuantity();
-                long receiverNewStock = receiverPrevStock + quantityToTransfer;
-                receiverStock.setStockQuantity(receiverNewStock);
-                warehouseStockRepository.save(receiverStock);
-
-                // Update Redis lock for destination warehouse
-                String destinationOrderLockKey = LOCK_KEY + receiverStock.getWarehouse().getId() + ":" + receiverStock.getProduct().getId() + ":" + orderId;
-                String destinationLockedQtyStr = redisTemplate.opsForValue().get(destinationOrderLockKey);
-                long destinationOrderLockedQty = (destinationLockedQtyStr != null) ? Long.parseLong(destinationLockedQtyStr) : 0L;
-                long newDestinationLock = destinationOrderLockedQty + quantityToTransfer;
-                redisTemplate.opsForValue().set(destinationOrderLockKey, String.valueOf(newDestinationLock), 1, TimeUnit.HOURS);
-
-                // Create receiver journal entry
-                MutationJournal receiverJournal = new MutationJournal();
-                receiverJournal.setMutationQuantity(quantityToTransfer);
-                receiverJournal.setPreviousStockQuantity(receiverPrevStock);
-                receiverJournal.setNewStockQuantity(receiverNewStock);
-                receiverJournal.setDescription("Automatic mutation: received " + quantityToTransfer
-                        + " units of " + product.getProductName() + " in warehouse " + destinationWarehouse.getName());
-                receiverJournal.setWarehouseStock(receiverStock);
-                receiverJournal.setOriginWarehouse(senderWarehouse);
-                receiverJournal.setDestinationWarehouse(destinationWarehouse);
-                receiverJournal.setStockChangeType(StockChangeType.TRANSFER);
-                receiverJournal.setStockAdjustmentType(StockAdjustmentType.POSITIVE);
-                receiverJournal.setMutationStatus(MutationStatus.COMPLETED);
-                receiverJournal.setRelatedJournal(senderJournal);
-
-                // Save both journals in a single transaction
-                mutationJournalRepository.saveAll(List.of(senderJournal, receiverJournal));
-
-                requiredQty -= quantityToTransfer;
             }
 
             if (requiredQty > 0) {
