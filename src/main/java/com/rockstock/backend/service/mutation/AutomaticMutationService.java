@@ -104,8 +104,8 @@ public class AutomaticMutationService {
                 senderJournal.setMutationQuantity(quantityToTransfer);
                 senderJournal.setPreviousStockQuantity(senderPrevStock);
                 senderJournal.setNewStockQuantity(senderNewStock);
-                senderJournal.setDescription("Automatic mutation: transferred " + quantityToTransfer
-                        + " units of " + product.getProductName() + " from warehouse " + senderWarehouse.getName());
+                senderJournal.setDescription("Auto mutation transfer " + quantityToTransfer
+                        + " of " + product.getProductName() + " in " + senderWarehouse.getName());
                 senderJournal.setWarehouseStock(senderStock);
                 senderJournal.setOriginWarehouse(senderWarehouse);
                 senderJournal.setDestinationWarehouse(destinationWarehouse);
@@ -118,8 +118,8 @@ public class AutomaticMutationService {
                 receiverJournal.setMutationQuantity(quantityToTransfer);
                 receiverJournal.setPreviousStockQuantity(receiverPrevStock);
                 receiverJournal.setNewStockQuantity(receiverNewStock);
-                receiverJournal.setDescription("Automatic mutation: received " + quantityToTransfer
-                        + " units of " + product.getProductName() + " in warehouse " + destinationWarehouse.getName());
+                receiverJournal.setDescription("Auto mutation receive " + quantityToTransfer
+                        + " of " + product.getProductName() + " in " + destinationWarehouse.getName());
                 receiverJournal.setWarehouseStock(receiverStock);
                 receiverJournal.setOriginWarehouse(senderWarehouse);
                 receiverJournal.setDestinationWarehouse(destinationWarehouse);
