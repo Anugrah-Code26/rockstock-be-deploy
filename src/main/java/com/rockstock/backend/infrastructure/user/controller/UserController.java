@@ -7,6 +7,8 @@ import com.rockstock.backend.infrastructure.user.dto.*;
 import com.rockstock.backend.service.user.UserService;
 import com.rockstock.backend.service.user.ResetPasswordService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,6 +38,14 @@ public class UserController {
     @GetMapping
     public ResponseEntity<List<GetAllUsersDTO>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+
+    @GetMapping("/{userId}/details")
+    public ResponseEntity<?> getUserDetails(@PathVariable Long userId,
+                                            @PageableDefault(size = 10) Pageable pageable) {
+        UserPublicDetailsDTO userDetails = userService.getUserDetails(userId, pageable);
+        return ResponseEntity.ok(ApiResponse.success("Get user details success", userDetails));
     }
 
 

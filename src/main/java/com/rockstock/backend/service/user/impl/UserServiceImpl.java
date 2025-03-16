@@ -4,14 +4,12 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.rockstock.backend.entity.user.User;
 import com.rockstock.backend.infrastructure.user.auth.security.Claims;
-import com.rockstock.backend.infrastructure.user.dto.GetAllUsersDTO;
+import com.rockstock.backend.infrastructure.user.dto.*;
 import com.rockstock.backend.infrastructure.user.repository.UserRepository;
-import com.rockstock.backend.infrastructure.user.dto.ChangePasswordRequest;
-import com.rockstock.backend.infrastructure.user.dto.UpdateProfileRequestDTO;
-import com.rockstock.backend.infrastructure.user.dto.UploadAvatarResponseDTO;
 import com.rockstock.backend.service.user.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -66,6 +64,21 @@ public class UserServiceImpl implements UserService {
     public List<GetAllUsersDTO> getAllUsers() {
         List<User> users = userRepository.findAll();
         return users.stream().map(GetAllUsersDTO::fromEntity).toList();
+    }
+
+    @Override
+    @Transactional
+    public UserPublicDetailsDTO getUserDetails(Long userId, Pageable pageable) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        UserPublicDetailsDTO userDetails = new UserPublicDetailsDTO();
+        userDetails.setUserId(user.getId());
+        userDetails.setPhotoProfileUrl(user.getPhotoProfileUrl());
+        userDetails.setFullName(user.getFullname());
+        userDetails.setEmail(user.getEmail());
+
+        return userDetails;
     }
 
 
