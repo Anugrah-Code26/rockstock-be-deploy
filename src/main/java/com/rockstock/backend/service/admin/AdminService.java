@@ -106,6 +106,7 @@ public class AdminService {
     }
 
 
+
     public void deleteAdmin(Long requesterId, Long adminId) {
         User requester = userRepository.findById(requesterId)
                 .orElseThrow(() -> new RuntimeException("Requester not found"));
@@ -123,5 +124,16 @@ public class AdminService {
         }
 
         userRepository.deleteById(adminId);
+    }
+
+
+    public void softDeleteAdmin(Long adminId) {
+        // Temukan admin berdasarkan ID
+        User admin = userRepository.findById(adminId)
+                .orElseThrow(() -> new RuntimeException("Admin not found"));
+
+        // Tandai admin sebagai deleted (soft delete)
+        admin.setIsDeleted(true); // Pastikan ada field isDeleted pada entity Admin
+        userRepository.save(admin); // Simpan perubahan
     }
 }
