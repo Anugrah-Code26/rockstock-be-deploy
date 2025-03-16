@@ -3,6 +3,7 @@ package com.rockstock.backend.service.order.impl;
 import com.rockstock.backend.entity.order.Order;
 import com.rockstock.backend.entity.order.OrderStatusList;
 import com.rockstock.backend.infrastructure.order.repository.OrderRepository;
+import com.rockstock.backend.service.mutation.ReleaseStockService;
 import com.rockstock.backend.service.order.OrderSchedulerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -17,6 +18,7 @@ import java.util.List;
 public class OrderSchedulerServiceImpl implements OrderSchedulerService {
 
     private final OrderRepository orderRepository;
+    private final ReleaseStockService releaseStockService;
 
     @Override
     @Transactional
@@ -28,7 +30,10 @@ public class OrderSchedulerServiceImpl implements OrderSchedulerService {
                 OrderStatusList.WAITING_FOR_PAYMENT, oneHourAgo);
 
         if (!expiredOrders.isEmpty()) {
-            expiredOrders.forEach(order -> order.setStatus(OrderStatusList.CANCELED));
+            for (Order order : expiredOrders) {
+                releaseStockService.releaseLockedStockForOrder(order.getId());
+                order.setStatus(OrderStatusList.CANCELED);
+            }
             orderRepository.saveAll(expiredOrders);
             System.out.println(expiredOrders.size() + " orders were automatically canceled.");
         }
