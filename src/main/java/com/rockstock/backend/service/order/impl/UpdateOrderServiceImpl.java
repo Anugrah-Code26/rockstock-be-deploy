@@ -73,7 +73,7 @@ public class UpdateOrderServiceImpl implements UpdateOrderService {
                 } else if (newStatus == OrderStatusList.PROCESSING) {
                     if (!foundOrder.getPaymentMethod().getName().equals("Manual Bank Transfer")) {
                         foundOrder.setStatus(newStatus);
-                        automaticMutationService.transferLockedStockForOrder(orderId);
+//                        automaticMutationService.transferLockedStockForOrder(orderId);
                     } else {
                         throw new IllegalArgumentException("Invalid payment method or payment not completed");
                     }
@@ -89,7 +89,7 @@ public class UpdateOrderServiceImpl implements UpdateOrderService {
                         foundOrder.setStatus(newStatus);
                     } else if (newStatus == OrderStatusList.PROCESSING) {
                         foundOrder.setStatus(newStatus);
-                        automaticMutationService.transferLockedStockForOrder(orderId);
+//                        automaticMutationService.transferLockedStockForOrder(orderId);
                     }
                 } else {
                     throw new IllegalStateException("Only Super Admin can approve or reject payments");
@@ -98,9 +98,9 @@ public class UpdateOrderServiceImpl implements UpdateOrderService {
             case PROCESSING -> {
                 if (userRole.equals("Super Admin") && newStatus == OrderStatusList.CANCELED) {
                     foundOrder.setStatus(newStatus);
-                    releaseStockService.releaseLockedStockForOrder(orderId);
+//                    releaseStockService.releaseLockedStockForOrder(orderId);
                 } else if (userRole.equals("Super Admin") && newStatus == OrderStatusList.ON_DELIVERY) {
-                    destinationShipmentService.shipOrder(foundOrder);
+//                    destinationShipmentService.shipOrder(foundOrder);
                     foundOrder.setStatus(newStatus);
                 } else {
                     throw new IllegalStateException("Only Super Admin can move order to ON_DELIVERY or CANCELED");

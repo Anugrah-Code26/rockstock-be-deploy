@@ -40,7 +40,7 @@ public class LockStockService {
 
         for (CartItem cartItem : cartItems) {
             Product product = cartItem.getProduct();
-            long requiredQty = cartItem.getTotalAmount().longValue();
+            long requiredQty = cartItem.getQuantity().longValue();
             Warehouse destinationWarehouse = order.getWarehouse();
 
             List<Warehouse> sortedWarehouses = findWarehousesSortedByDistance(destinationWarehouse);
