@@ -66,8 +66,11 @@ public class AutomaticMutationService {
 
                 try {
                     String lockedQtyStr = redisTemplate.opsForValue().get(orderLockKey);
-                    long lockedQty = (lockedQtyStr != null) ? Long.parseLong(lockedQtyStr) : 0L;
-                    if (lockedQty <= 0) continue;
+                    long lockedQty = 0L;
+
+                    if (lockedQtyStr != null && !lockedQtyStr.equals("LOCKED")) {
+                        lockedQty = Long.parseLong(lockedQtyStr);
+                    }
 
                     long quantityToTransfer = Math.min(requiredQty, lockedQty);
                     long senderPrevStock = senderStock.getStockQuantity();
