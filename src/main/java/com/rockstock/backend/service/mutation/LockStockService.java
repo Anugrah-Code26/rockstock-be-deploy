@@ -52,6 +52,9 @@ public class LockStockService {
 
                 if (warehouseStock != null) {
                     long availableStock = warehouseStock.getStockQuantity() - warehouseStock.getLockedQuantity();
+                    System.out.println("Checking stock for warehouse " + warehouseStock.getWarehouse().getId() +
+                            " - Available: " + availableStock +
+                            " - Required: " + requiredQty);
 
                     if (availableStock > 0) {
                         long lockedQty = Math.min(availableStock, requiredQty);
@@ -75,12 +78,18 @@ public class LockStockService {
     private void lockStockInWarehouse(WarehouseStock warehouseStock, Long orderId, long qty) {
         long newLockedQty = warehouseStock.getLockedQuantity() + qty;
         warehouseStock.setLockedQuantity(newLockedQty);
-
         warehouseStockRepository.save(warehouseStock);
 
-        String orderLockKey = LOCK_KEY + warehouseStock.getWarehouse().getId() + ":" + warehouseStock.getProduct().getId() + ":" + orderId;
+        String orderLockKey = String.format("lock:warehouseStock:%d:%d:%d",
+                warehouseStock.getWarehouse().getId(),
+                warehouseStock.getProduct().getId(),
+                orderId);
+
+        System.out.println("Saving lock in Redis: " + orderLockKey + " -> " + qty);
+
         redisTemplate.opsForValue().set(orderLockKey, String.valueOf(qty), 1, TimeUnit.HOURS);
     }
+
 
     private List<Warehouse> findWarehousesSortedByDistance(Warehouse destinationWarehouse) {
         if (destinationWarehouse == null || destinationWarehouse.getLatitude() == null || destinationWarehouse.getLongitude() == null) {
