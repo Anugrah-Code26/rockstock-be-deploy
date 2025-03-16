@@ -34,4 +34,10 @@ public class WarehouseAdminController {
         List<WarehouseAdminResponseDTO> admins = warehouseAdminService.getWarehouseAdmins(warehouseId);
         return ResponseEntity.ok(admins);
     }
+
+    @DeleteMapping("/remove/{warehouseAdminId}")
+    public ResponseEntity<Void> removeWarehouseAdmin(@PathVariable Long warehouseAdminId) {
+        warehouseAdminService.removeWarehouseAdmin(warehouseAdminId);
+        return ResponseEntity.noContent().build();
+    }
 }
