@@ -66,10 +66,10 @@ public class AutomaticMutationService {
 
                 try {
                     String lockedQtyStr = redisTemplate.opsForValue().get(orderLockKey);
-                    long lockedQty = lockedQtyStr != null ? Long.parseLong(lockedQtyStr) : 0L;
+                    long lockedQty = 0L;
 
-                    if (lockedQty <= 0) {
-                        continue;
+                    if (lockedQtyStr != null && lockedQtyStr.matches("\\d+")) {
+                        lockedQty = Long.parseLong(lockedQtyStr);
                     }
 
                     long quantityToTransfer = Math.min(requiredQty, lockedQty);
@@ -151,7 +151,7 @@ public class AutomaticMutationService {
 
                     requiredQty -= quantityToTransfer;
                 } finally {
-                    redisTemplate.delete(orderLockKey); // Ensure lock is always released
+                    redisTemplate.delete(orderLockKey);
                 }
             }
 
