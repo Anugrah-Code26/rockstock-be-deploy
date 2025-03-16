@@ -68,6 +68,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/login").permitAll()
                         .requestMatchers("/api/v1/auth/google/login").permitAll()
                         .requestMatchers("/api/v1/auth/oauth/google").permitAll()
+                        .requestMatchers("/api/v1/reviews").permitAll()
                         .requestMatchers("/api/v1/admin/**").permitAll()
                         .requestMatchers("/api/v1/user/**").permitAll()
                         .requestMatchers("/api/v1/user/profile").permitAll()
