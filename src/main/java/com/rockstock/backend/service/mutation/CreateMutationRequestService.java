@@ -33,6 +33,10 @@ public class CreateMutationRequestService {
         Product product = productRepository.findByIdAndDeletedAtIsNull(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
+        if (warehouseId.equals(requestDTO.getOriginWarehouseId())) {
+            throw new RuntimeException("Destination warehouse cannot be the same as origin warehouse");
+        }
+
         Warehouse originWarehouse = warehouseRepository.findByIdAndDeletedAtIsNull(requestDTO.getOriginWarehouseId())
                 .orElseThrow(() -> new RuntimeException("Origin warehouse not found"));
 

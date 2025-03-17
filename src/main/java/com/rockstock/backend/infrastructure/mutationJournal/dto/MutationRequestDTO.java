@@ -20,4 +20,4 @@ public class MutationRequestDTO {
     @Size(min = 3, max = 100)
     @Column(length = 100)
     private String description;
-}
+}   

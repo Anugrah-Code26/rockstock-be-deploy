@@ -74,13 +74,35 @@ public class LockStockService {
     }
 
     private void lockStockInWarehouse(WarehouseStock warehouseStock, Long orderId, long qty) {
+        // Display the original locked quantity
+        System.out.println("Before locking, Locked Qty for product " + warehouseStock.getProduct().getProductName() +
+                " in warehouse " + warehouseStock.getWarehouse().getName() + " is: " + warehouseStock.getLockedQuantity());
+
+        // Lock the stock in the warehouse
         long newLockedQty = warehouseStock.getLockedQuantity() + qty;
         warehouseStock.setLockedQuantity(newLockedQty);
         warehouseStockRepository.save(warehouseStock);
 
+        // Output the updated locked quantity in the warehouse
+        System.out.println("Updated Locked Qty for product " + warehouseStock.getProduct().getProductName() +
+                " in warehouse " + warehouseStock.getWarehouse().getName() + " is: " + newLockedQty);
+
+        // Create Redis key for the order-product combination
         String orderLockKey = String.format("o:%d:p:%d", orderId, warehouseStock.getProduct().getId());
 
-        redisTemplate.opsForValue().set(orderLockKey, String.valueOf(qty), 1, TimeUnit.HOURS);
+        // Output the current value of the Redis lock key
+        String existingLockedQtyStr = redisTemplate.opsForValue().get(orderLockKey);
+        long existingLockedQty = (existingLockedQtyStr != null && existingLockedQtyStr.matches("\\d+")) ?
+                Long.parseLong(existingLockedQtyStr) : 0L;
+
+        System.out.println("Existing Redis Locked Qty for " + orderLockKey + ": " + existingLockedQty);
+
+        // Add the locked quantity to the existing Redis value
+        long newRedisLockedQty = existingLockedQty + qty;
+        redisTemplate.opsForValue().set(orderLockKey, String.valueOf(newRedisLockedQty), 1, TimeUnit.HOURS);
+
+        // Output the new value of the Redis lock key
+        System.out.println("Updated Redis Locked Qty for " + orderLockKey + " to: " + newRedisLockedQty);
     }
 
     private List<Warehouse> findWarehousesSortedByDistance(Warehouse destinationWarehouse) {
