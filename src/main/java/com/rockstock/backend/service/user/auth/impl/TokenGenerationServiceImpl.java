@@ -50,9 +50,9 @@ public class TokenGenerationServiceImpl implements TokenGenerationService {
                 .map(warehouseAdmin -> warehouseAdmin.getWarehouse().getId())
                 .toList();
 
-        String roles = user.getUserRoles().stream()
+        List<String> roles = user.getUserRoles().stream()
                 .map(userRole -> userRole.getRole().getName())
-                .collect(Collectors.joining(" "));
+                .toList();
 
         System.out.println("check " + roles + " " + user.getId());
         JwtClaimsSet claims = JwtClaimsSet.builder()
