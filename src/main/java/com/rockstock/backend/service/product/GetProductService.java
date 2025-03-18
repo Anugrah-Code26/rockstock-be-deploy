@@ -3,6 +3,7 @@ package com.rockstock.backend.service.product;
 import com.rockstock.backend.entity.product.Product;
 import com.rockstock.backend.entity.product.ProductStatus;
 import com.rockstock.backend.infrastructure.product.dto.GetAllProductResponseDTO;
+import com.rockstock.backend.infrastructure.product.dto.GetListProductResponseDTO;
 import com.rockstock.backend.infrastructure.product.dto.GetProductResponseDTO;
 import com.rockstock.backend.infrastructure.product.repository.ProductRepository;
 import com.rockstock.backend.infrastructure.product.specification.FilterProductSpecifications;
@@ -22,6 +23,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,8 +31,10 @@ public class GetProductService {
     private final ProductRepository productRepository;
     private final WarehouseStockRepository warehouseStockRepository;
 
-    public List<Product> getAllListProducts() {
-        return productRepository.findAll();
+    public List<GetListProductResponseDTO> getAllListProducts() {
+        return productRepository.findAll().stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
     }
 
     public GetProductResponseDTO getProductById(Long productId) {
@@ -114,5 +118,14 @@ public class GetProductService {
             BigDecimal totalStock = warehouseStockRepository.getTotalStockByProductId(product.getId());
             return GetAllProductResponseDTO.fromProduct(product, totalStock);
         });
+    }
+
+    private GetListProductResponseDTO mapToDTO(Product product) {
+        GetListProductResponseDTO dto = new GetListProductResponseDTO();
+        dto.setProductId(product.getId());
+        dto.setProductName(product.getProductName());
+        dto.setCategoryId(product.getProductCategory().getId());
+        dto.setProductCategory(product.getProductCategory().getCategoryName());
+        return dto;
     }
 }

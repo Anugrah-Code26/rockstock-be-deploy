@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -63,8 +64,8 @@ public class ProductCategoryController {
 
     @GetMapping("/all")
     @PreAuthorize("permitAll()")
-    public ResponseEntity<?> getAllListProductCategories() {
-        return ApiResponse.success(HttpStatus.OK.value(), "Get all product categories success!",productCategoryService.getAllListProductCategories());
+    public ResponseEntity<List<GetListProductCategoryResponseDTO>> getAllListProductCategories() {
+        return ResponseEntity.ok(productCategoryService.getAllListProductCategories());
     }
 
     @GetMapping

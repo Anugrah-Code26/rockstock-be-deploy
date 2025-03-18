@@ -20,9 +20,12 @@ public class SalesReportServiceImpl implements SalesReportService {
     private final SalesReportRepository salesReportRepository;
 
     @Override
-    public List<SalesReportDTO> getSalesReport(int month, int year, Long warehouseId, Long productId, Long productCategoryId) {
+    public List<SalesReportDTO> getSalesReportByMonth(int year, Long warehouseId, Long productId, Long productCategoryId) {
         String role = Claims.getRoleFromJwt();
         List<Long> warehouseIds = Claims.getWarehouseIdsFromJwt();
+
+        System.out.println("Report Role: ");
+        System.out.println(role);
 
         if ("Customer".equals(role)) {
             throw new AuthorizationDeniedException("You do not have access!");
@@ -32,10 +35,12 @@ public class SalesReportServiceImpl implements SalesReportService {
             throw new AuthorizationDeniedException("You do not have access to this warehouse!");
         }
 
-        ZoneOffset zoneOffset = OffsetDateTime.now().getOffset();
-        OffsetDateTime startDateTime = LocalDateTime.of(year, month, 1, 0, 0, 0).atOffset(zoneOffset);
-        OffsetDateTime endDateTime = startDateTime.plusMonths(1).minusSeconds(1);
-
-        return salesReportRepository.findSalesReport(OrderStatusList.COMPLETED, startDateTime, endDateTime, warehouseId, productId, productCategoryId);
+        return salesReportRepository.findSalesReport(
+                OrderStatusList.COMPLETED,
+                year,
+                warehouseId,
+                productId,
+                productCategoryId
+        );
     }
 }

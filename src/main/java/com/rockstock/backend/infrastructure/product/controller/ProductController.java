@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @RestController
 @RequestMapping("api/v1/products")
@@ -59,8 +61,8 @@ public class ProductController {
 
     @GetMapping("/all")
     @PreAuthorize("permitAll()")
-    public ResponseEntity<?> getAllListProducts() {
-        return ApiResponse.success(HttpStatus.OK.value(), "Get all products success!",getProductService.getAllListProducts());
+    public ResponseEntity<List<GetListProductResponseDTO>> getAllListProducts() {
+        return ResponseEntity.ok(getProductService.getAllListProducts());
     }
 
     @GetMapping("/{id}")

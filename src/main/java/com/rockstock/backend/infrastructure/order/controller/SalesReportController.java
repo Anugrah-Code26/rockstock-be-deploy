@@ -17,15 +17,14 @@ import java.util.List;
 public class SalesReportController {
     private final SalesReportService salesReportService;
 
-    @GetMapping("/sales")
-    public ResponseEntity<List<SalesReportDTO>> getSalesReport(
-            @RequestParam int month,
+    @GetMapping("/monthly")
+    public ResponseEntity<List<SalesReportDTO>> getSalesReportByMonth(
             @RequestParam int year,
             @RequestParam(required = false) Long warehouseId,
             @RequestParam(required = false) Long productId,
-            @RequestParam(required = false) Long productCategoryId) {
-
-        List<SalesReportDTO> salesReport = salesReportService.getSalesReport(month, year, warehouseId, productId, productCategoryId);
-        return ResponseEntity.ok(salesReport);
+            @RequestParam(required = false) Long productCategoryId
+    ) {
+        List<SalesReportDTO> report = salesReportService.getSalesReportByMonth(year, warehouseId, productId, productCategoryId);
+        return ResponseEntity.ok(report);
     }
 }

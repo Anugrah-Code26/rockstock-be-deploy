@@ -20,6 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -111,8 +112,10 @@ public class ProductCategoryService {
         productCategoryRepository.save(productCategory);
     }
 
-    public List<ProductCategory> getAllListProductCategories() {
-        return productCategoryRepository.findAll();
+    public List<GetListProductCategoryResponseDTO> getAllListProductCategories() {
+        return productCategoryRepository.findAll().stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
     }
 
     public Page<HomeProductCategoryDTO> getAllCategories(String categoryName, Pageable pageable) {
@@ -136,5 +139,12 @@ public class ProductCategoryService {
                 .orElseThrow(() -> new EntityNotFoundException("Product Category with ID " + categoryId + " not found"));
 
         return new GetProductCategoryResponseDTO(productCategory.getId(), productCategory.getCategoryPicture(), productCategory.getCategoryName());
+    }
+
+    private GetListProductCategoryResponseDTO mapToDTO(ProductCategory productCategory) {
+        GetListProductCategoryResponseDTO dto = new GetListProductCategoryResponseDTO();
+        dto.setCategoryId(productCategory.getId());
+        dto.setCategoryName(productCategory.getCategoryName());
+        return dto;
     }
 }
