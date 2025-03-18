@@ -6,6 +6,7 @@ import com.rockstock.backend.entity.warehouse.Warehouse;
 import com.rockstock.backend.infrastructure.mutationJournal.dto.MutationRequestDTO;
 import com.rockstock.backend.infrastructure.mutationJournal.repository.MutationJournalRepository;
 import com.rockstock.backend.infrastructure.product.repository.ProductRepository;
+import com.rockstock.backend.infrastructure.util.security.AuthorizationUtil;
 import com.rockstock.backend.infrastructure.warehouse.repository.WarehouseRepository;
 import com.rockstock.backend.infrastructure.warehouseStock.repository.WarehouseStockRepository;
 import jakarta.transaction.Transactional;
@@ -25,7 +26,7 @@ public class CreateMutationRequestService {
 
     @Transactional
     public void createMutationRequest(Long warehouseId, Long productId, MutationRequestDTO requestDTO) {
-//        AuthorizationUtil.validateDestinationAuthorization(warehouseId);
+        AuthorizationUtil.validateDestinationAuthorization(warehouseId);
 
         Warehouse destinationWarehouse = warehouseRepository.findByIdAndDeletedAtIsNull(warehouseId)
                 .orElseThrow(() -> new RuntimeException("Destination warehouse not found"));

@@ -74,7 +74,7 @@ public class UpdateOrderServiceImpl implements UpdateOrderService {
                 } else if (newStatus == OrderStatusList.PROCESSING) {
                     if (!foundOrder.getPaymentMethod().getName().equals("Manual Bank Transfer")) {
                         foundOrder.setStatus(newStatus);
-                        automaticMutationService.transferLockedStockForOrder(orderId);
+//                        automaticMutationService.transferLockedStockForOrder(orderId);
                     } else {
                         throw new IllegalArgumentException("Invalid payment method or payment not completed");
                     }
@@ -90,7 +90,7 @@ public class UpdateOrderServiceImpl implements UpdateOrderService {
                         foundOrder.setStatus(newStatus);
                     } else if (newStatus == OrderStatusList.PROCESSING) {
                         foundOrder.setStatus(newStatus);
-                        automaticMutationService.transferLockedStockForOrder(orderId);
+//                        automaticMutationService.transferLockedStockForOrder(orderId);
                     }
                 } else {
                     throw new IllegalStateException("Only Super Admin can approve or reject payments");

@@ -6,6 +6,7 @@ import com.rockstock.backend.entity.warehouse.Warehouse;
 import com.rockstock.backend.infrastructure.mutationJournal.dto.StockAdjustmentRequestDTO;
 import com.rockstock.backend.infrastructure.mutationJournal.repository.MutationJournalRepository;
 import com.rockstock.backend.infrastructure.product.repository.ProductRepository;
+import com.rockstock.backend.infrastructure.util.security.AuthorizationUtil;
 import com.rockstock.backend.infrastructure.warehouse.repository.WarehouseRepository;
 import com.rockstock.backend.infrastructure.warehouseStock.repository.WarehouseStockRepository;
 import jakarta.transaction.Transactional;
@@ -31,7 +32,7 @@ public class AdjustStockService {
             throw new IllegalArgumentException("New stock quantity must not be null");
         }
 
-//        AuthorizationUtil.validateDestinationAuthorization(warehouseId);
+        AuthorizationUtil.validateDestinationAuthorization(warehouseId);
 
         Warehouse warehouse = warehouseRepository.findByIdAndDeletedAtIsNull(warehouseId)
                 .orElseThrow(() -> new RuntimeException("Warehouse not found"));

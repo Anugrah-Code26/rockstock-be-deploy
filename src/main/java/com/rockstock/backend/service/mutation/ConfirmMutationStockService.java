@@ -6,6 +6,7 @@ import com.rockstock.backend.entity.stock.StockChangeType;
 import com.rockstock.backend.entity.stock.WarehouseStock;
 import com.rockstock.backend.infrastructure.mutationJournal.dto.ConfirmStockRequestDTO;
 import com.rockstock.backend.infrastructure.mutationJournal.repository.MutationJournalRepository;
+import com.rockstock.backend.infrastructure.util.security.AuthorizationUtil;
 import com.rockstock.backend.infrastructure.warehouseStock.repository.WarehouseStockRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +34,7 @@ public class ConfirmMutationStockService {
         MutationJournal originMutationJournal = mutationJournalRepository.findOriginJournalByDestinationId(journalId)
                 .orElseThrow(() -> new RuntimeException("Related origin journal not found"));
 
-//        AuthorizationUtil.validateDestinationAuthorization(warehouseId);
+        AuthorizationUtil.validateDestinationAuthorization(warehouseId);
 
         if (!Objects.equals(destinationMutationJournal.getDestinationWarehouse().getId(), warehouseId)) {
             throw new RuntimeException("The warehouse is not the same");
