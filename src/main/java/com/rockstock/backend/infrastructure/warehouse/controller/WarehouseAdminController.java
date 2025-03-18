@@ -5,6 +5,7 @@ import com.rockstock.backend.infrastructure.warehouse.dto.WarehouseAdminResponse
 import com.rockstock.backend.service.warehouse.WarehouseAdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,7 +19,8 @@ public class WarehouseAdminController {
 
     @PostMapping("/assign")
     public ResponseEntity<Void> assignWarehouseAdmin(@RequestBody AssignWarehouseAdminDTO requestDTO) {
-        warehouseAdminService.assignWarehouseAdmin(requestDTO);
+        String currentUserRole = "Super Admin";
+        warehouseAdminService.assignWarehouseAdmin(requestDTO, currentUserRole);
         return ResponseEntity.ok().build();
     }
 
@@ -28,7 +30,6 @@ public class WarehouseAdminController {
         return ResponseEntity.ok(admins);
     }
 
-
     @GetMapping("/{warehouseId}")
     public ResponseEntity<List<WarehouseAdminResponseDTO>> getWarehouseAdmins(@PathVariable Long warehouseId) {
         List<WarehouseAdminResponseDTO> admins = warehouseAdminService.getWarehouseAdmins(warehouseId);
@@ -36,6 +37,7 @@ public class WarehouseAdminController {
     }
 
     @DeleteMapping("/remove/{warehouseAdminId}")
+    @PreAuthorize("hasRole('Super Admin')")
     public ResponseEntity<Void> removeWarehouseAdmin(@PathVariable Long warehouseAdminId) {
         warehouseAdminService.removeWarehouseAdmin(warehouseAdminId);
         return ResponseEntity.noContent().build();
