@@ -9,7 +9,6 @@ import com.rockstock.backend.infrastructure.user.repository.UserRepository;
 import com.rockstock.backend.service.warehouse.WarehouseAdminService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,11 +25,7 @@ public class WarehouseAdminServiceImpl implements WarehouseAdminService {
 
     @Transactional
     @Override
-    public void assignWarehouseAdmin(AssignWarehouseAdminDTO request, String currentUserRole) {
-        if (!currentUserRole.equals("Super Admin")) {
-            throw new AccessDeniedException("Only Super Admin can assign Warehouse Admins");
-        }
-
+    public void assignWarehouseAdmin(AssignWarehouseAdminDTO request) {
         var warehouse = warehouseRepository.findById(request.getWarehouseId())
                 .orElseThrow(() -> new EntityNotFoundException("Warehouse not found"));
 
@@ -43,7 +38,6 @@ public class WarehouseAdminServiceImpl implements WarehouseAdminService {
 
         warehouseAdminRepository.save(warehouseAdmin);
     }
-
 
     @Override
     public List<WarehouseAdminResponseDTO> getAllWarehouseAdmins() {
