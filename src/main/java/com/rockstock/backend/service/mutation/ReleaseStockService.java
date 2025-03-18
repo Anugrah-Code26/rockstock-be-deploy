@@ -9,7 +9,6 @@ import com.rockstock.backend.infrastructure.order.repository.OrderRepository;
 import com.rockstock.backend.infrastructure.warehouse.repository.WarehouseRepository;
 import com.rockstock.backend.infrastructure.warehouseStock.repository.WarehouseStockRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,42 +19,40 @@ import java.util.Optional;
 @Transactional
 @RequiredArgsConstructor
 public class ReleaseStockService {
-        private final OrderRepository orderRepository;
-        private final OrderItemRepository orderItemRepository;
-        private final WarehouseRepository warehouseRepository;
-        private final WarehouseStockRepository warehouseStockRepository;
-        private final RedisTemplate<String, String> redisTemplate;
-
-        private static final String LOCK_KEY = "lock:warehouseStock:";
+    private final OrderRepository orderRepository;
+    private final OrderItemRepository orderItemRepository;
+    private final WarehouseRepository warehouseRepository;
+    private final WarehouseStockRepository warehouseStockRepository;
 
     public void releaseLockedStockForOrder(Long orderId) {
+        // Check if order exists
         orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
+        // Get all items in the order
         List<OrderItem> orderItems = orderItemRepository.findAllByOrderId(orderId);
 
         for (OrderItem orderItem : orderItems) {
             Product product = orderItem.getProduct();
-            List<Warehouse> warehouses = warehouseRepository.findAll();
+            Long releasedQty = orderItem.getQuantity().longValue();
 
+            // Find stock in warehouses
+            List<Warehouse> warehouses = warehouseRepository.findAll();
             for (Warehouse warehouse : warehouses) {
                 Optional<WarehouseStock> stockOpt = warehouseStockRepository.findByProductAndWarehouse(product, warehouse);
-                if (stockOpt.isEmpty()) {
-                    continue;
-                }
-                WarehouseStock stock = stockOpt.get();
-                String orderLockKey = LOCK_KEY + stock.getWarehouse().getId() + ":" + stock.getProduct().getId() + ":" + orderId;
 
-                System.out.println("Checking Redis key: " + orderLockKey);
-                String lockedQtyStr = redisTemplate.opsForValue().get(orderLockKey);
-                if (lockedQtyStr != null) {
-                    long lockedQty = Long.parseLong(lockedQtyStr);
-                    redisTemplate.delete(orderLockKey);
+                if (stockOpt.isPresent()) {
+                    WarehouseStock stock = stockOpt.get();
 
-                    WarehouseStock latestStock = warehouseStockRepository.findById(stock.getId()).orElse(stock);
-                    long newLockedQty = Math.max(latestStock.getLockedQuantity() - lockedQty, 0);
-                    latestStock.setLockedQuantity(newLockedQty);
-                    warehouseStockRepository.save(latestStock);
+                    // Reduce locked quantity
+                    long newLockedQty = Math.max(stock.getLockedQuantity() - releasedQty, 0);
+                    stock.setLockedQuantity(newLockedQty);
+                    warehouseStockRepository.save(stock);
+
+                    // Stop looping if all locked stock is released
+                    if (newLockedQty == 0) {
+                        break;
+                    }
                 }
             }
         }

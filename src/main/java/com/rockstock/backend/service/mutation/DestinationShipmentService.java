@@ -20,13 +20,9 @@ import java.util.Optional;
 @Transactional
 @RequiredArgsConstructor
 public class DestinationShipmentService {
-
     private final OrderItemRepository orderItemRepository;
     private final WarehouseStockRepository warehouseStockRepository;
     private final MutationJournalRepository mutationJournalRepository;
-    private final RedisTemplate<String, String> redisTemplate;
-
-    private static final String LOCK_KEY = "lock:warehouseStock:";
 
     public void shipOrder(Order order) {
         Warehouse destinationWarehouse = order.getWarehouse();
@@ -36,54 +32,45 @@ public class DestinationShipmentService {
             Product product = orderItem.getProduct();
             long requiredQty = orderItem.getQuantity();
 
-            Optional<WarehouseStock> destinationStockOpt = warehouseStockRepository.findByProductAndWarehouse(product, destinationWarehouse);
-            if (destinationStockOpt.isEmpty()) {
-                throw new RuntimeException("No stock record found for product " + product.getProductName() +
-                        " in destination warehouse " + destinationWarehouse.getName());
-            }
-            WarehouseStock destinationStock = destinationStockOpt.get();
+            WarehouseStock destinationStock = warehouseStockRepository.findByProductAndWarehouse(product, destinationWarehouse)
+                    .orElseThrow(() -> new RuntimeException("No stock record found for product " + product.getProductName() +
+                            " in destination warehouse " + destinationWarehouse.getName()));
 
-            String destinationOrderLockKey = LOCK_KEY + destinationStock.getId() + ":" + order.getId();
-            String lockedQtyStr = redisTemplate.opsForValue().get(destinationOrderLockKey);
-            long lockedQty = (lockedQtyStr != null) ? Long.parseLong(lockedQtyStr) : 0L;
+            long lockedQty = destinationStock.getLockedQuantity();
 
             if (lockedQty < requiredQty) {
                 throw new RuntimeException("Insufficient locked quantity (" + lockedQty + ") for product "
                         + product.getProductName() + " in order " + order.getOrderCode());
             }
 
-            synchronized (this) { // Prevent race conditions
-                long destinationPrevStock = destinationStock.getStockQuantity();
-                long destinationPrevLocked = destinationStock.getLockedQuantity();
+            long destinationPrevStock = destinationStock.getStockQuantity();
+            long destinationPrevLocked = destinationStock.getLockedQuantity();
 
-                long destinationNewStock = destinationPrevStock - requiredQty;
-                long destinationNewLocked = destinationPrevLocked - requiredQty;
+            long destinationNewStock = destinationPrevStock - requiredQty;
+            long destinationNewLocked = destinationPrevLocked - requiredQty;
 
-                if (destinationNewStock < 0 || destinationNewLocked < 0) {
-                    throw new RuntimeException("Stock inconsistency detected during shipping for " + product.getProductName());
-                }
-
-                destinationStock.setStockQuantity(destinationNewStock);
-                destinationStock.setLockedQuantity(destinationNewLocked);
-                warehouseStockRepository.save(destinationStock);
-
-                redisTemplate.delete(destinationOrderLockKey);
-
-                MutationJournal shipmentJournal = new MutationJournal();
-                shipmentJournal.setMutationQuantity(requiredQty);
-                shipmentJournal.setPreviousStockQuantity(destinationPrevStock);
-                shipmentJournal.setNewStockQuantity(destinationNewStock);
-                shipmentJournal.setDescription("Destination warehouse " + destinationWarehouse.getName() +
-                        " shipped " + requiredQty + " units of " + product.getProductName() +
-                        " to customer for order " + order.getOrderCode());
-                shipmentJournal.setWarehouseStock(destinationStock);
-                shipmentJournal.setOriginWarehouse(destinationWarehouse);
-                shipmentJournal.setDestinationWarehouse(null);
-                shipmentJournal.setStockChangeType(StockChangeType.SALES_DISPATCHED);
-                shipmentJournal.setStockAdjustmentType(StockAdjustmentType.NEGATIVE);
-                shipmentJournal.setMutationStatus(MutationStatus.ON_DELIVERY);
-                mutationJournalRepository.save(shipmentJournal);
+            if (destinationNewStock < 0 || destinationNewLocked < 0) {
+                throw new RuntimeException("Stock inconsistency detected during shipping for " + product.getProductName());
             }
+
+            destinationStock.setStockQuantity(destinationNewStock);
+            destinationStock.setLockedQuantity(destinationNewLocked);
+            warehouseStockRepository.save(destinationStock);
+
+            MutationJournal shipmentJournal = new MutationJournal();
+            shipmentJournal.setMutationQuantity(requiredQty);
+            shipmentJournal.setPreviousStockQuantity(destinationPrevStock);
+            shipmentJournal.setNewStockQuantity(destinationNewStock);
+            shipmentJournal.setDescription("Destination warehouse " + destinationWarehouse.getName() +
+                    " shipped " + requiredQty + " units of " + product.getProductName() +
+                    " to customer for order " + order.getOrderCode());
+            shipmentJournal.setWarehouseStock(destinationStock);
+            shipmentJournal.setOriginWarehouse(destinationWarehouse);
+            shipmentJournal.setDestinationWarehouse(null);
+            shipmentJournal.setStockChangeType(StockChangeType.SALES_DISPATCHED);
+            shipmentJournal.setStockAdjustmentType(StockAdjustmentType.NEGATIVE);
+            shipmentJournal.setMutationStatus(MutationStatus.COMPLETED);
+            mutationJournalRepository.save(shipmentJournal);
         }
     }
 }

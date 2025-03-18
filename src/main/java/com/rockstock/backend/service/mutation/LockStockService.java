@@ -12,13 +12,11 @@ import com.rockstock.backend.infrastructure.order.repository.OrderRepository;
 import com.rockstock.backend.infrastructure.warehouse.repository.WarehouseRepository;
 import com.rockstock.backend.infrastructure.warehouseStock.repository.WarehouseStockRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +25,6 @@ public class LockStockService {
     private final WarehouseRepository warehouseRepository;
     private final WarehouseStockRepository warehouseStockRepository;
     private final OrderRepository orderRepository;
-    private final RedisTemplate<String, String> redisTemplate;
 
     @Transactional
     public void lockStockForOrder(Long orderId, Cart cart) {
@@ -44,19 +41,16 @@ public class LockStockService {
             List<Warehouse> sortedWarehouses = findWarehousesSortedByDistance(destinationWarehouse);
 
             for (Warehouse warehouse : sortedWarehouses) {
-                if (requiredQty <= 0) break; // Exit if stock is fully locked
+                if (requiredQty <= 0) break;
 
                 WarehouseStock warehouseStock = findAvailableStock(product, warehouse);
 
                 if (warehouseStock != null) {
                     long availableStock = warehouseStock.getStockQuantity() - warehouseStock.getLockedQuantity();
-                    System.out.println("Checking stock for warehouse " + warehouseStock.getWarehouse().getId() +
-                            " - Available: " + availableStock +
-                            " - Required: " + requiredQty);
 
                     if (availableStock > 0) {
                         long lockedQty = Math.min(availableStock, requiredQty);
-                        lockStockInWarehouse(warehouseStock, orderId, lockedQty);
+                        lockStockInWarehouse(warehouseStock, lockedQty);
                         requiredQty -= lockedQty;
                     }
                 }
@@ -73,36 +67,14 @@ public class LockStockService {
         return warehouseStockOpt.orElse(null);
     }
 
-    private void lockStockInWarehouse(WarehouseStock warehouseStock, Long orderId, long qty) {
-        // Display the original locked quantity
+    private void lockStockInWarehouse(WarehouseStock warehouseStock, long qty) {
         System.out.println("Before locking, Locked Qty for product " + warehouseStock.getProduct().getProductName() +
                 " in warehouse " + warehouseStock.getWarehouse().getName() + " is: " + warehouseStock.getLockedQuantity());
 
-        // Lock the stock in the warehouse
         long newLockedQty = warehouseStock.getLockedQuantity() + qty;
         warehouseStock.setLockedQuantity(newLockedQty);
         warehouseStockRepository.save(warehouseStock);
 
-        // Output the updated locked quantity in the warehouse
-        System.out.println("Updated Locked Qty for product " + warehouseStock.getProduct().getProductName() +
-                " in warehouse " + warehouseStock.getWarehouse().getName() + " is: " + newLockedQty);
-
-        // Create Redis key for the order-product combination
-        String orderLockKey = String.format("o:%d:p:%d", orderId, warehouseStock.getProduct().getId());
-
-        // Output the current value of the Redis lock key
-        String existingLockedQtyStr = redisTemplate.opsForValue().get(orderLockKey);
-        long existingLockedQty = (existingLockedQtyStr != null && existingLockedQtyStr.matches("\\d+")) ?
-                Long.parseLong(existingLockedQtyStr) : 0L;
-
-        System.out.println("Existing Redis Locked Qty for " + orderLockKey + ": " + existingLockedQty);
-
-        // Add the locked quantity to the existing Redis value
-        long newRedisLockedQty = existingLockedQty + qty;
-        redisTemplate.opsForValue().set(orderLockKey, String.valueOf(newRedisLockedQty), 1, TimeUnit.HOURS);
-
-        // Output the new value of the Redis lock key
-        System.out.println("Updated Redis Locked Qty for " + orderLockKey + " to: " + newRedisLockedQty);
     }
 
     private List<Warehouse> findWarehousesSortedByDistance(Warehouse destinationWarehouse) {

@@ -13,24 +13,20 @@ import com.rockstock.backend.infrastructure.warehouse.repository.WarehouseReposi
 import com.rockstock.backend.infrastructure.warehouseStock.repository.WarehouseStockRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class AutomaticMutationService {
-
     private final OrderItemRepository orderItemRepository;
     private final WarehouseRepository warehouseRepository;
     private final WarehouseStockRepository warehouseStockRepository;
     private final OrderRepository orderRepository;
     private final MutationJournalRepository mutationJournalRepository;
-    private final RedisTemplate<String, String> redisTemplate;
 
     @Transactional
     public void transferLockedStockForOrder(Long orderId) {
@@ -43,119 +39,98 @@ public class AutomaticMutationService {
         List<OrderItem> orderItems = orderItemRepository.findAllByOrderId(orderId);
         System.out.println("Order contains " + orderItems.size() + " items");
 
+        Warehouse destinationWarehouse = order.getWarehouse();
+
         for (OrderItem orderItem : orderItems) {
             Product product = orderItem.getProduct();
             long requiredQty = orderItem.getQuantity();
-            Warehouse destinationWarehouse = order.getWarehouse();
 
             System.out.println("Processing product: " + product.getProductName() + " | Required Qty: " + requiredQty);
             System.out.println("Destination Warehouse: " + destinationWarehouse.getName());
 
-            // Check if the destination warehouse has locked stock first
+            // **Step 1: Use locked stock from the destination warehouse first**
             Optional<WarehouseStock> receiverStockOpt = warehouseStockRepository.findByProductAndWarehouse(product, destinationWarehouse);
-            if (receiverStockOpt.isEmpty()) {
-                receiverStockOpt = Optional.of(new WarehouseStock());
-            }
+            WarehouseStock receiverStock = receiverStockOpt.orElseGet(() -> {
+                WarehouseStock newStock = new WarehouseStock();
+                newStock.setProduct(product);
+                newStock.setWarehouse(destinationWarehouse);
+                newStock.setStockQuantity(0L);
+                newStock.setLockedQuantity(0L);
+                return newStock;
+            });
 
-            WarehouseStock receiverStock = receiverStockOpt.get();
-            String destinationOrderLockKey = String.format("o:%d:p:%d", orderId, receiverStock.getProduct().getId());
-            String destinationLockedQtyStr = redisTemplate.opsForValue().get(destinationOrderLockKey);
-            long destinationLockedQty = (destinationLockedQtyStr != null) ? Long.parseLong(destinationLockedQtyStr) : 0L;
+            long destinationLockedQty = receiverStock.getLockedQuantity();
 
-            // If there's stock at the destination warehouse, lock it first
             if (destinationLockedQty > 0) {
-                long transferQtyFromDestination = Math.min(requiredQty, destinationLockedQty);
-                requiredQty -= transferQtyFromDestination;
-                System.out.println("Transferring " + transferQtyFromDestination + " units from destination warehouse");
+                long usedQty = Math.min(requiredQty, destinationLockedQty);
+                requiredQty -= usedQty;
+                System.out.println("Using " + usedQty + " locked stock from destination warehouse");
 
-                // Perform stock transfer to destination warehouse (from destination warehouse)
-                long receiverPrevStock = receiverStock.getStockQuantity();
-                long receiverNewStock = receiverPrevStock + transferQtyFromDestination;
-                receiverStock.setStockQuantity(receiverNewStock);
+                receiverStock.setStockQuantity(receiverStock.getStockQuantity() + usedQty);
+                receiverStock.setLockedQuantity(receiverStock.getLockedQuantity() - usedQty);
                 warehouseStockRepository.save(receiverStock);
 
-                // Update Redis to lock the stock
-                redisTemplate.opsForValue().set(destinationOrderLockKey, String.valueOf(receiverNewStock), 1, TimeUnit.HOURS);
+                // Log mutation as receiver (destination warehouse receives its own stock)
+                createMutationJournal(receiverStock, destinationWarehouse, destinationWarehouse, usedQty, receiverStock.getStockQuantity() - usedQty, receiverStock.getStockQuantity(), "Used " + usedQty + " locked stock from own warehouse", StockAdjustmentType.POSITIVE);
+            }
 
-                // Create receiver mutation journal (for destination warehouse)
-                createMutationJournal(receiverStock, destinationWarehouse, destinationWarehouse, transferQtyFromDestination, receiverPrevStock, receiverNewStock, "Received " + transferQtyFromDestination + " units from " + destinationWarehouse.getName(), StockAdjustmentType.POSITIVE);
+            // **Step 2: If more stock is needed, transfer from the nearest warehouses**
+            if (requiredQty > 0) {
+                List<Warehouse> sortedWarehouses = findWarehousesSortedByDistance(destinationWarehouse);
+                for (Warehouse senderWarehouse : sortedWarehouses) {
+                    if (senderWarehouse.getId().equals(destinationWarehouse.getId())) continue; // Skip self
 
-                // If there's still stock left to fulfill, look to nearest warehouses
-                if (requiredQty > 0) {
-                    List<Warehouse> sortedWarehouses = findWarehousesSortedByDistance(destinationWarehouse);
-                    for (Warehouse senderWarehouse : sortedWarehouses) {
-                        if (senderWarehouse.getId().equals(destinationWarehouse.getId())) continue;  // Skip if the sender is the same as the destination warehouse
-
-                        Optional<WarehouseStock> senderStockOpt = warehouseStockRepository.findByProductAndWarehouse(product, senderWarehouse);
-                        if (senderStockOpt.isEmpty()) {
-                            System.out.println("No stock found in warehouse: " + senderWarehouse.getName());
-                            continue;
-                        }
-
-                        WarehouseStock senderStock = senderStockOpt.get();
-                        String orderLockKey = String.format("o:%d:p:%d", orderId, senderStock.getProduct().getId());
-
-                        // Fetch locked stock from Redis
-                        String lockedQtyStr = redisTemplate.opsForValue().get(orderLockKey);
-                        long lockedQty = (lockedQtyStr != null && lockedQtyStr.matches("\\d+")) ? Long.parseLong(lockedQtyStr) : 0L;
-                        System.out.println("Locked stock before transfer: " + lockedQty);
-
-                        if (lockedQty == 0) {
-                            System.out.println("Error: No locked stock available for order " + orderId + " and product " + product.getProductName());
-                            continue;
-                        }
-
-                        // Perform transfer from sender warehouse
-                        long quantityToTransfer = Math.min(requiredQty, lockedQty);
-                        if (quantityToTransfer <= 0) continue;
-
-                        System.out.println("Transferring " + quantityToTransfer + " units from " + senderWarehouse.getName() + " to " + destinationWarehouse.getName());
-
-                        // Update sender and receiver stock
-                        long senderPrevStock = senderStock.getStockQuantity();
-                        long senderNewStock = senderPrevStock - quantityToTransfer;
-
-                        // Fetch latest sender stock and update it
-                        WarehouseStock latestSenderStock = warehouseStockRepository.findById(senderStock.getId()).orElse(senderStock);
-                        long newLockedQty = Math.max(latestSenderStock.getLockedQuantity() - quantityToTransfer, 0);
-                        latestSenderStock.setLockedQuantity(newLockedQty);
-                        latestSenderStock.setStockQuantity(senderNewStock);
-                        warehouseStockRepository.save(latestSenderStock);
-
-                        System.out.println("Updated sender stock: Prev=" + senderPrevStock + ", New=" + senderNewStock);
-
-                        // Create sender mutation journal (for sender warehouse)
-                        createMutationJournal(latestSenderStock, senderWarehouse, destinationWarehouse, quantityToTransfer, senderPrevStock, senderNewStock, "Sent " + quantityToTransfer + " units to " + destinationWarehouse.getName(), StockAdjustmentType.NEGATIVE);
-
-                        // Transfer stock to the destination warehouse
-                        WarehouseStock receiverStockFinal = warehouseStockRepository.findByProductAndWarehouse(product, destinationWarehouse)
-                                .orElseGet(() -> {
-                                    WarehouseStock newStock = new WarehouseStock();
-                                    newStock.setProduct(product);
-                                    newStock.setWarehouse(destinationWarehouse);
-                                    newStock.setStockQuantity(0L);
-                                    newStock.setLockedQuantity(0L);
-                                    return newStock;
-                                });
-
-                        long receiverPrevStockFinal = receiverStockFinal.getStockQuantity();
-                        long receiverNewStockFinal = receiverPrevStockFinal + quantityToTransfer;
-                        receiverStockFinal.setStockQuantity(receiverNewStockFinal);
-                        warehouseStockRepository.save(receiverStockFinal);
-
-                        // Lock transferred stock in Redis
-                        redisTemplate.opsForValue().set(destinationOrderLockKey, String.valueOf(receiverNewStockFinal), 1, TimeUnit.HOURS);
-                        requiredQty -= quantityToTransfer;
+                    Optional<WarehouseStock> senderStockOpt = warehouseStockRepository.findByProductAndWarehouse(product, senderWarehouse);
+                    if (senderStockOpt.isEmpty()) {
+                        System.out.println("No stock found in warehouse: " + senderWarehouse.getName());
+                        continue;
                     }
+
+                    WarehouseStock senderStock = senderStockOpt.get();
+                    long senderLockedQty = senderStock.getLockedQuantity();
+
+                    if (senderLockedQty == 0) {
+                        System.out.println("No locked stock available in " + senderWarehouse.getName());
+                        continue;
+                    }
+
+                    long transferQty = Math.min(requiredQty, senderLockedQty);
+                    if (transferQty <= 0) continue;
+
+                    System.out.println("Transferring " + transferQty + " units from " + senderWarehouse.getName() + " to " + destinationWarehouse.getName());
+
+                    // **Update sender warehouse stock**
+                    long senderPrevStock = senderStock.getStockQuantity();
+                    long senderNewStock = senderPrevStock - transferQty;
+                    senderStock.setStockQuantity(senderNewStock);
+                    senderStock.setLockedQuantity(senderStock.getLockedQuantity() - transferQty);
+                    warehouseStockRepository.save(senderStock);
+
+                    // Log mutation as sender (warehouse sending stock)
+                    createMutationJournal(senderStock, senderWarehouse, destinationWarehouse, transferQty, senderPrevStock, senderNewStock, "Sent " + transferQty + " units to " + destinationWarehouse.getName(), StockAdjustmentType.NEGATIVE);
+
+                    // **Update receiver warehouse stock (Destination Warehouse)**
+                    long receiverPrevStock = receiverStock.getStockQuantity();
+                    long receiverNewStock = receiverPrevStock + transferQty;
+                    receiverStock.setStockQuantity(receiverNewStock);
+                    receiverStock.setLockedQuantity(receiverStock.getLockedQuantity() + transferQty); // Add locked stock
+                    warehouseStockRepository.save(receiverStock);
+
+                    // Log mutation as receiver (destination warehouse receives stock)
+                    createMutationJournal(receiverStock, senderWarehouse, destinationWarehouse, transferQty, receiverPrevStock, receiverNewStock, "Received " + transferQty + " units from " + senderWarehouse.getName(), StockAdjustmentType.POSITIVE);
+
+                    requiredQty -= transferQty;
+
+                    if (requiredQty == 0) break; // Stop when required quantity is met
                 }
             }
 
-            // Check if there is still required quantity after all transfers
+            // **Step 3: If stock is still insufficient, throw an error**
             if (requiredQty > 0) {
                 throw new RuntimeException("Not enough locked stock available to transfer for product " + product.getProductName());
             }
 
-            System.out.println("Stock transfer process completed for order ID: " + orderId);
+            System.out.println("Stock transfer completed for order ID: " + orderId);
         }
     }
 
@@ -172,7 +147,6 @@ public class AutomaticMutationService {
         journal.setStockAdjustmentType(adjustmentType);
         journal.setMutationStatus(MutationStatus.COMPLETED);
 
-        // Save the journal (You can add logic to create related journals, if needed)
         mutationJournalRepository.save(journal);
     }
 
