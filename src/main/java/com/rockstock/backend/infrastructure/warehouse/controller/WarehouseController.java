@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,6 +28,7 @@ public class WarehouseController {
 
     // CRUD Warehouse
     @PostMapping
+    @PreAuthorize("hasRole('Super Admin')")
     public ResponseEntity<WarehouseResponseDTO> createWarehouse(@Valid @RequestBody WarehouseRequestDTO request) {
         return ResponseEntity.ok(warehouseService.createWarehouse(request));
     }
@@ -50,15 +52,17 @@ public class WarehouseController {
     }
 
     @PutMapping("/{warehouseId}")
+    @PreAuthorize("hasRole('Super Admin')")
     public ResponseEntity<WarehouseResponseDTO> updateWarehouse(
             @PathVariable Long warehouseId,
-            @Valid @RequestBody WarehouseRequestDTO request) {  // ← gunakan WarehouseRequestDTO
+            @Valid @RequestBody WarehouseRequestDTO request) {
         return ResponseEntity.ok(warehouseService.updateWarehouse(warehouseId, request));
     }
 
 
 
     @DeleteMapping("/{warehouseId}")
+    @PreAuthorize("hasRole('Super Admin')")
     public ResponseEntity<Void> deleteWarehouse(@PathVariable Long warehouseId) {
         warehouseService.deleteWarehouse(warehouseId);
         return ResponseEntity.noContent().build();
