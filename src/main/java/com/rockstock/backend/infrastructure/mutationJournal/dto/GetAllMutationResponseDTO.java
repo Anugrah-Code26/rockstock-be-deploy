@@ -21,7 +21,9 @@ public class GetAllMutationResponseDTO {
         private String productName;
         private Long warehouseStockId;
         private String originWarehouse;
+        private Long originWarehouseId;
         private String destinationWarehouse;
+        private Long destinationWarehouseId;
         private Long mutationQuantity;
         private Long previousStockQuantity;
         private Long newStockQuantity;
@@ -38,7 +40,9 @@ public class GetAllMutationResponseDTO {
                         journal.getWarehouseStock().getProduct().getProductName(),
                         journal.getWarehouseStock().getId(),
                         journal.getOriginWarehouse() != null ? journal.getOriginWarehouse().getName() : "N/A",
+                        journal.getOriginWarehouse() != null ? journal.getOriginWarehouse().getId() : null,
                         journal.getDestinationWarehouse() != null ? journal.getDestinationWarehouse().getName() : "N/A",
+                        journal.getDestinationWarehouse() != null ? journal.getDestinationWarehouse().getId() : null,
                         journal.getMutationQuantity(),
                         journal.getPreviousStockQuantity(),
                         journal.getNewStockQuantity(),

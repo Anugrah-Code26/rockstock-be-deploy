@@ -1,9 +1,6 @@
 package com.rockstock.backend.service.mutation;
 
 import com.rockstock.backend.entity.stock.MutationJournal;
-import com.rockstock.backend.entity.stock.MutationStatus;
-import com.rockstock.backend.entity.stock.StockAdjustmentType;
-import com.rockstock.backend.entity.stock.StockChangeType;
 import com.rockstock.backend.infrastructure.mutationJournal.dto.GetAllMutationResponseDTO;
 import com.rockstock.backend.infrastructure.mutationJournal.dto.GetMutationResponseDTO;
 import com.rockstock.backend.infrastructure.mutationJournal.repository.MutationJournalRepository;
@@ -30,8 +27,8 @@ public class GetMutationJournalService {
 
     @Transactional
     public Page<GetAllMutationResponseDTO> getAllMutationJournals(
-            String productName, Long warehouseId, MutationStatus status,
-            StockAdjustmentType adjustmentType, StockChangeType stockChangeType,
+            String productName, Long warehouseId, String status,
+            String adjustmentType, String stockChangeType,
             String sortDirection, Pageable pageable) {
 
 //        String currentUserRole = Claims.getRoleFromJwt();

@@ -1,8 +1,5 @@
 package com.rockstock.backend.infrastructure.mutationJournal.controller;
 
-import com.rockstock.backend.entity.stock.MutationStatus;
-import com.rockstock.backend.entity.stock.StockAdjustmentType;
-import com.rockstock.backend.entity.stock.StockChangeType;
 import com.rockstock.backend.infrastructure.mutationJournal.dto.*;
 import com.rockstock.backend.service.mutation.*;
 import jakarta.validation.Valid;
@@ -84,14 +81,15 @@ public class MutationController {
     public ResponseEntity<Page<GetAllMutationResponseDTO>> getAllMutationJournals(
             @RequestParam(required = false) String productName,
             @RequestParam(required = false) Long warehouseId,
-            @RequestParam(required = false) MutationStatus status,
-            @RequestParam(required = false) StockAdjustmentType adjustmentType,
-            @RequestParam(required = false) StockChangeType stockChangeType,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String adjustmentType,
+            @RequestParam(required = false) String stockChangeType,
             @RequestParam(defaultValue = "DESC") String sortDirection,
             @PageableDefault(page = 0, size = 10) Pageable pageable) {
 
         Page<GetAllMutationResponseDTO> result = getMutationJournalService.getAllMutationJournals(
-                productName, warehouseId, status, adjustmentType, stockChangeType, sortDirection, pageable);
+                productName, warehouseId, status, adjustmentType, stockChangeType, sortDirection, pageable
+        );
 
         return ResponseEntity.ok(result);
     }
