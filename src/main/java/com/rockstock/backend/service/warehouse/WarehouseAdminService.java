@@ -6,8 +6,8 @@ import com.rockstock.backend.infrastructure.warehouse.dto.WarehouseAdminResponse
 import java.util.List;
 
 public interface WarehouseAdminService {
-    void assignWarehouseAdmin(AssignWarehouseAdminDTO request);
+    void assignWarehouseAdmin(AssignWarehouseAdminDTO request, String currentUserRole);
     void removeWarehouseAdmin(Long warehouseAdminId);
     List<WarehouseAdminResponseDTO> getWarehouseAdmins(Long warehouseId);
-    List<WarehouseAdminResponseDTO> getAllWarehouseAdmins(); // Tambahkan ini
+    List<WarehouseAdminResponseDTO> getAllWarehouseAdmins();
 }
