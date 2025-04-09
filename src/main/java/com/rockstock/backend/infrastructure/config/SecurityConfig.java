@@ -95,11 +95,11 @@ public class SecurityConfig {
                         .requestMatchers("/verification-email.html").permitAll() // Allow email template
                         .requestMatchers("/static/**").permitAll()
                         .requestMatchers("/api/v1/addresses/**").permitAll()
-                        .requestMatchers("/api/v1/products/all").permitAll()
-                        .requestMatchers("/api/v1/products/{id}").permitAll()
-                        .requestMatchers("/api/v1/products/active").permitAll()
-                        .requestMatchers("/api/v1/products/draft").permitAll()
-                        .requestMatchers("/api/v1/pictures/{productId}").permitAll()
+                        .requestMatchers("/api/v1/products/**").permitAll()
+                        .requestMatchers("/api/v1/categories/**").permitAll()
+                        .requestMatchers("/api/v1/stocks/**").permitAll()
+                        .requestMatchers("/api/v1/mutations/**").permitAll()
+                        .requestMatchers("/api/v1/pictures/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(oauth2 -> {

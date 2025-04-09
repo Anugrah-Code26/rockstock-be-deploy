@@ -32,12 +32,12 @@ public class ProductCategoryService {
     private final CloudinaryService cloudinaryService;
     private final DeleteCloudinaryService deleteCloudinaryService;
 
-    private void checkSuperAdminAccess() {
+//    private void checkSuperAdminAccess() {
 //        String role = Claims.getRoleFromJwt();
 //        if (!"Super Admin".equalsIgnoreCase(role)) {
 //            throw new AuthorizationDeniedException("Access denied: Only Super Admin can perform this action.");
 //        }
-    }
+//    }
 
     @Transactional
     public CreateProductCategoryResponseDTO createProductCategory(CreateProductCategoryRequestDTO createProductCategoryRequestDTO, MultipartFile file) throws IOException {
