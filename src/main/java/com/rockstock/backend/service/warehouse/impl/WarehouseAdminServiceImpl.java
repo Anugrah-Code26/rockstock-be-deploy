@@ -1,11 +1,11 @@
 package com.rockstock.backend.service.warehouse.impl;
 
 import com.rockstock.backend.entity.warehouse.WarehouseAdmin;
+import com.rockstock.backend.infrastructure.user.repository.UserRepository;
 import com.rockstock.backend.infrastructure.warehouse.dto.AssignWarehouseAdminDTO;
 import com.rockstock.backend.infrastructure.warehouse.dto.WarehouseAdminResponseDTO;
 import com.rockstock.backend.infrastructure.warehouse.repository.WarehouseAdminRepository;
 import com.rockstock.backend.infrastructure.warehouse.repository.WarehouseRepository;
-import com.rockstock.backend.infrastructure.user.repository.UserRepository;
 import com.rockstock.backend.service.warehouse.WarehouseAdminService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;

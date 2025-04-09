@@ -5,6 +5,7 @@ import com.rockstock.backend.entity.product.ProductCategory;
 import com.rockstock.backend.infrastructure.product.repository.ProductRepository;
 import com.rockstock.backend.infrastructure.productCategory.dto.*;
 import com.rockstock.backend.infrastructure.productCategory.repository.ProductCategoryRepository;
+import com.rockstock.backend.infrastructure.user.auth.security.Claims;
 import com.rockstock.backend.service.cloudinary.CloudinaryService;
 import com.rockstock.backend.service.cloudinary.DeleteCloudinaryService;
 import jakarta.persistence.EntityNotFoundException;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -30,8 +32,16 @@ public class ProductCategoryService {
     private final CloudinaryService cloudinaryService;
     private final DeleteCloudinaryService deleteCloudinaryService;
 
+    private void checkSuperAdminAccess() {
+        String role = Claims.getRoleFromJwt();
+        if (!"Super Admin".equalsIgnoreCase(role)) {
+            throw new AuthorizationDeniedException("Access denied: Only Super Admin can perform this action.");
+        }
+    }
+
     @Transactional
     public CreateProductCategoryResponseDTO createProductCategory(CreateProductCategoryRequestDTO createProductCategoryRequestDTO, MultipartFile file) throws IOException {
+        checkSuperAdminAccess();
         String categoryName = createProductCategoryRequestDTO.getCategoryName().trim();
 
         if (productCategoryRepository.existsByCategoryName(categoryName)) {
@@ -60,6 +70,7 @@ public class ProductCategoryService {
 
     @Transactional
     public CreateProductCategoryResponseDTO updateProductCategory(UpdateProductCategoryRequestDTO requestDTO) throws IOException {
+        checkSuperAdminAccess();
         ProductCategory productCategory = productCategoryRepository.findByCategoryId(requestDTO.getCategoryId())
                 .orElseThrow(() -> new EntityNotFoundException("Category not found: " + requestDTO.getCategoryId()));
 
@@ -92,6 +103,7 @@ public class ProductCategoryService {
 
     @Transactional
     public void softDeleteProductCategory(Long categoryId) {
+        checkSuperAdminAccess();
         ProductCategory productCategory = productCategoryRepository.findByCategoryId(categoryId)
                 .orElseThrow(() -> new EntityNotFoundException("Category not found"));
 
@@ -105,6 +117,7 @@ public class ProductCategoryService {
     }
 
     public void restoreProductCategory(Long categoryId) {
+        checkSuperAdminAccess();
         ProductCategory productCategory = productCategoryRepository.findDeletedCategoryById(categoryId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found or not deleted"));
 
@@ -113,12 +126,20 @@ public class ProductCategoryService {
     }
 
     public List<GetListProductCategoryResponseDTO> getAllListProductCategories() {
+        String role = Claims.getRoleFromJwt();
+        if ("Customer".equalsIgnoreCase(role)) {
+            throw new AuthorizationDeniedException("Access denied: You are not allowed to access product categories.");
+        }
         return productCategoryRepository.findAll().stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
 
     public Page<HomeProductCategoryDTO> getAllCategories(String categoryName, Pageable pageable) {
+        String role = Claims.getRoleFromJwt();
+        if ("Customer".equalsIgnoreCase(role)) {
+            throw new AuthorizationDeniedException("Access denied: You are not allowed to access product categories.");
+        }
         if (categoryName == null || categoryName.trim().isEmpty()) {
             return productCategoryRepository.findAllActiveCategories(null, pageable)
                     .map(category -> new HomeProductCategoryDTO(
@@ -135,6 +156,10 @@ public class ProductCategoryService {
     }
 
     public GetProductCategoryResponseDTO getProductCategoryById(Long categoryId) {
+        String role = Claims.getRoleFromJwt();
+        if ("Customer".equalsIgnoreCase(role)) {
+            throw new AuthorizationDeniedException("Access denied: You are not allowed to access product categories.");
+        }
         ProductCategory productCategory = productCategoryRepository.findByCategoryId(categoryId)
                 .orElseThrow(() -> new EntityNotFoundException("Product Category with ID " + categoryId + " not found"));
 

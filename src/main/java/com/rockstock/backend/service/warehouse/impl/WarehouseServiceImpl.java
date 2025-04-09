@@ -13,6 +13,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -58,6 +59,33 @@ public class WarehouseServiceImpl implements WarehouseService {
         List<Warehouse> warehouses = warehouseRepository.findByIds(warehouseIds);
 
         return warehouses.stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<WarehouseResponseDTO> getWarehousesByRoles() {
+        String role = Claims.getRoleFromJwt();
+
+        if ("Customer".equalsIgnoreCase(role)) {
+            throw new AuthorizationDeniedException("You do not have access!");
+        }
+
+        if ("Super Admin".equalsIgnoreCase(role)) {
+            return warehouseRepository.findAll()
+                    .stream()
+                    .map(this::mapToDTO)
+                    .collect(Collectors.toList());
+        }
+
+        List<Long> warehouseIds = Claims.getWarehouseIdsFromJwt();
+
+        if (warehouseIds == null || warehouseIds.isEmpty()) {
+            throw new AuthorizationDeniedException("You are not assigned to any warehouses.");
+        }
+
+        return warehouseRepository.findByIds(warehouseIds)
+                .stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }

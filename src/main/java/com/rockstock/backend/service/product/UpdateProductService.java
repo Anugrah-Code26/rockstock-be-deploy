@@ -11,12 +11,14 @@ import com.rockstock.backend.infrastructure.product.dto.UpdateProductResponseDTO
 import com.rockstock.backend.infrastructure.product.repository.ProductRepository;
 import com.rockstock.backend.infrastructure.productCategory.repository.ProductCategoryRepository;
 import com.rockstock.backend.infrastructure.productPicture.repository.ProductPictureRepository;
+import com.rockstock.backend.infrastructure.user.auth.security.Claims;
 import com.rockstock.backend.infrastructure.warehouse.repository.WarehouseRepository;
 import com.rockstock.backend.infrastructure.warehouseStock.repository.WarehouseStockRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -36,6 +38,10 @@ public class UpdateProductService {
     private final WarehouseStockRepository warehouseStockRepository;
 
     public UpdateProductResponseDTO updateProductToActive(Long id, UpdateProductRequestDTO updateProductRequestDTO) {
+        String role = Claims.getRoleFromJwt();
+        if (!"Super Admin".equalsIgnoreCase(role)) {
+            throw new AuthorizationDeniedException("Access denied: Only Super Admin can perform this action.");
+        }
         Product product = productRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 

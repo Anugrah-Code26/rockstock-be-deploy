@@ -1,7 +1,6 @@
 package com.rockstock.backend.service.warehouse.impl;
 
 import com.rockstock.backend.common.utils.DistanceCalculator;
-import com.rockstock.backend.entity.geolocation.Address;
 import com.rockstock.backend.entity.warehouse.Warehouse;
 import com.rockstock.backend.infrastructure.warehouse.repository.WarehouseRepository;
 import com.rockstock.backend.service.warehouse.FindNearestWarehouseService;

@@ -5,6 +5,7 @@ import com.rockstock.backend.entity.stock.MutationJournal;
 import com.rockstock.backend.entity.stock.MutationStatus;
 import com.rockstock.backend.infrastructure.mutationJournal.dto.CancelRequestDTO;
 import com.rockstock.backend.infrastructure.mutationJournal.repository.MutationJournalRepository;
+import com.rockstock.backend.infrastructure.util.security.AuthorizationUtil;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class CancelMutationRequestService {
         MutationJournal destinationMutationJournal = mutationJournalRepository.findById(journalId)
                 .orElseThrow(() -> new EntityNotFoundException("Stock journal not found"));
 
-//        AuthorizationUtil.validateDestinationAuthorization(warehouseId);
+        AuthorizationUtil.validateDestinationAuthorization(warehouseId);
 
         if (!destinationMutationJournal.getDestinationWarehouse().getId().equals(warehouseId)) {
             throw new AccessDeniedException("Access denied: Only the destination warehouse can cancel this request.");

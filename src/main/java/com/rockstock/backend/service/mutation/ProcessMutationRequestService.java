@@ -4,6 +4,7 @@ import com.rockstock.backend.entity.stock.*;
 import com.rockstock.backend.entity.warehouse.Warehouse;
 import com.rockstock.backend.infrastructure.mutationJournal.dto.ProcessRequestDTO;
 import com.rockstock.backend.infrastructure.mutationJournal.repository.MutationJournalRepository;
+import com.rockstock.backend.infrastructure.util.security.AuthorizationUtil;
 import com.rockstock.backend.infrastructure.warehouseStock.repository.WarehouseStockRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -26,7 +27,7 @@ public class ProcessMutationRequestService {
         MutationJournal destinationMutationJournal = mutationJournalRepository.findById(journalId)
                 .orElseThrow(() -> new EntityNotFoundException("Stock journal not found"));
 
-//        AuthorizationUtil.validateOriginAuthorization(destinationMutationJournal);
+        AuthorizationUtil.validateOriginAuthorization(destinationMutationJournal);
 
         if (!destinationMutationJournal.getOriginWarehouse().getId().equals(warehouseId)) {
             throw new AccessDeniedException("Access denied: The provided warehouse does not match the origin warehouse in this mutation request.");

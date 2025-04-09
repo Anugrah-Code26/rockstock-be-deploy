@@ -11,4 +11,5 @@ public interface WarehouseService {
     WarehouseResponseDTO updateWarehouse(Long warehouseId, WarehouseRequestDTO request);
     void deleteWarehouse(Long warehouseId);
     List<WarehouseResponseDTO> getWarehousesByWarehouseAdmin();
+    List<WarehouseResponseDTO> getWarehousesByRoles();
 }
