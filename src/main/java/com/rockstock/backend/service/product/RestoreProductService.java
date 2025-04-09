@@ -25,10 +25,10 @@ public class RestoreProductService {
 
     @Transactional
     public void restoreProduct(Long id) {
-        String role = Claims.getRoleFromJwt();
-        if (!"Super Admin".equalsIgnoreCase(role)) {
-            throw new AuthorizationDeniedException("Access denied: Only Super Admin can perform this action.");
-        }
+//        String role = Claims.getRoleFromJwt();
+//        if (!"Super Admin".equalsIgnoreCase(role)) {
+//            throw new AuthorizationDeniedException("Access denied: Only Super Admin can perform this action.");
+//        }
         Product product = productRepository.findByIdAndDeletedAtIsNotNull(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found or not deleted"));
 

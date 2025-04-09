@@ -33,15 +33,15 @@ public class ProductCategoryService {
     private final DeleteCloudinaryService deleteCloudinaryService;
 
     private void checkSuperAdminAccess() {
-        String role = Claims.getRoleFromJwt();
-        if (!"Super Admin".equalsIgnoreCase(role)) {
-            throw new AuthorizationDeniedException("Access denied: Only Super Admin can perform this action.");
-        }
+//        String role = Claims.getRoleFromJwt();
+//        if (!"Super Admin".equalsIgnoreCase(role)) {
+//            throw new AuthorizationDeniedException("Access denied: Only Super Admin can perform this action.");
+//        }
     }
 
     @Transactional
     public CreateProductCategoryResponseDTO createProductCategory(CreateProductCategoryRequestDTO createProductCategoryRequestDTO, MultipartFile file) throws IOException {
-        checkSuperAdminAccess();
+//        checkSuperAdminAccess();
         String categoryName = createProductCategoryRequestDTO.getCategoryName().trim();
 
         if (productCategoryRepository.existsByCategoryName(categoryName)) {
@@ -70,7 +70,7 @@ public class ProductCategoryService {
 
     @Transactional
     public CreateProductCategoryResponseDTO updateProductCategory(UpdateProductCategoryRequestDTO requestDTO) throws IOException {
-        checkSuperAdminAccess();
+//        checkSuperAdminAccess();
         ProductCategory productCategory = productCategoryRepository.findByCategoryId(requestDTO.getCategoryId())
                 .orElseThrow(() -> new EntityNotFoundException("Category not found: " + requestDTO.getCategoryId()));
 
@@ -103,7 +103,7 @@ public class ProductCategoryService {
 
     @Transactional
     public void softDeleteProductCategory(Long categoryId) {
-        checkSuperAdminAccess();
+//        checkSuperAdminAccess();
         ProductCategory productCategory = productCategoryRepository.findByCategoryId(categoryId)
                 .orElseThrow(() -> new EntityNotFoundException("Category not found"));
 
@@ -117,7 +117,7 @@ public class ProductCategoryService {
     }
 
     public void restoreProductCategory(Long categoryId) {
-        checkSuperAdminAccess();
+//        checkSuperAdminAccess();
         ProductCategory productCategory = productCategoryRepository.findDeletedCategoryById(categoryId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found or not deleted"));
 
@@ -126,20 +126,20 @@ public class ProductCategoryService {
     }
 
     public List<GetListProductCategoryResponseDTO> getAllListProductCategories() {
-        String role = Claims.getRoleFromJwt();
-        if ("Customer".equalsIgnoreCase(role)) {
-            throw new AuthorizationDeniedException("Access denied: You are not allowed to access product categories.");
-        }
+//        String role = Claims.getRoleFromJwt();
+//        if ("Customer".equalsIgnoreCase(role)) {
+//            throw new AuthorizationDeniedException("Access denied: You are not allowed to access product categories.");
+//        }
         return productCategoryRepository.findAll().stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
 
     public Page<HomeProductCategoryDTO> getAllCategories(String categoryName, Pageable pageable) {
-        String role = Claims.getRoleFromJwt();
-        if ("Customer".equalsIgnoreCase(role)) {
-            throw new AuthorizationDeniedException("Access denied: You are not allowed to access product categories.");
-        }
+//        String role = Claims.getRoleFromJwt();
+//        if ("Customer".equalsIgnoreCase(role)) {
+//            throw new AuthorizationDeniedException("Access denied: You are not allowed to access product categories.");
+//        }
         if (categoryName == null || categoryName.trim().isEmpty()) {
             return productCategoryRepository.findAllActiveCategories(null, pageable)
                     .map(category -> new HomeProductCategoryDTO(
@@ -156,10 +156,10 @@ public class ProductCategoryService {
     }
 
     public GetProductCategoryResponseDTO getProductCategoryById(Long categoryId) {
-        String role = Claims.getRoleFromJwt();
-        if ("Customer".equalsIgnoreCase(role)) {
-            throw new AuthorizationDeniedException("Access denied: You are not allowed to access product categories.");
-        }
+//        String role = Claims.getRoleFromJwt();
+//        if ("Customer".equalsIgnoreCase(role)) {
+//            throw new AuthorizationDeniedException("Access denied: You are not allowed to access product categories.");
+//        }
         ProductCategory productCategory = productCategoryRepository.findByCategoryId(categoryId)
                 .orElseThrow(() -> new EntityNotFoundException("Product Category with ID " + categoryId + " not found"));
 

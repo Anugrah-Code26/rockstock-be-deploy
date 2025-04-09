@@ -25,7 +25,7 @@ public class CancelMutationRequestService {
         MutationJournal destinationMutationJournal = mutationJournalRepository.findById(journalId)
                 .orElseThrow(() -> new EntityNotFoundException("Stock journal not found"));
 
-        AuthorizationUtil.validateDestinationAuthorization(warehouseId);
+//        AuthorizationUtil.validateDestinationAuthorization(warehouseId);
 
         if (!destinationMutationJournal.getDestinationWarehouse().getId().equals(warehouseId)) {
             throw new AccessDeniedException("Access denied: Only the destination warehouse can cancel this request.");

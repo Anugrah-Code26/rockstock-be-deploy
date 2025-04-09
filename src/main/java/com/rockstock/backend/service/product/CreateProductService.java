@@ -24,10 +24,10 @@ public class CreateProductService {
 
     @Transactional
     public CreateProductResponseDTO createDraftProduct() {
-        String role = Claims.getRoleFromJwt();
-        if (!"Super Admin".equalsIgnoreCase(role)) {
-            throw new AuthorizationDeniedException("Access denied: Only Super Admin can perform this action.");
-        }
+//        String role = Claims.getRoleFromJwt();
+//        if (!"Super Admin".equalsIgnoreCase(role)) {
+//            throw new AuthorizationDeniedException("Access denied: Only Super Admin can perform this action.");
+//        }
         Product product = new Product();
         product.setProductName("Draft Product");
         product.setDetail("This is a draft product.");

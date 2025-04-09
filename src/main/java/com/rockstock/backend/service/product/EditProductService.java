@@ -26,10 +26,10 @@ public class EditProductService {
     private final ProductCategoryRepository productCategoryRepository;
 
     public EditProductResponseDTO editProduct(Long id, EditProductRequestDTO editProductRequestDTO) {
-        String role = Claims.getRoleFromJwt();
-        if (!"Super Admin".equalsIgnoreCase(role)) {
-            throw new AuthorizationDeniedException("Access denied: Only Super Admin can perform this action.");
-        }
+//        String role = Claims.getRoleFromJwt();
+//        if (!"Super Admin".equalsIgnoreCase(role)) {
+//            throw new AuthorizationDeniedException("Access denied: Only Super Admin can perform this action.");
+//        }
         Product product = productRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 

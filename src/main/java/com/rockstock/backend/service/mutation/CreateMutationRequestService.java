@@ -26,7 +26,7 @@ public class CreateMutationRequestService {
 
     @Transactional
     public void createMutationRequest(Long warehouseId, Long productId, MutationRequestDTO requestDTO) {
-        AuthorizationUtil.validateDestinationAuthorization(warehouseId);
+//        AuthorizationUtil.validateDestinationAuthorization(warehouseId);
 
         Warehouse destinationWarehouse = warehouseRepository.findByIdAndDeletedAtIsNull(warehouseId)
                 .orElseThrow(() -> new RuntimeException("Destination warehouse not found"));

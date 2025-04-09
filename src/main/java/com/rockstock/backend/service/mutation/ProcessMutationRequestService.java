@@ -27,7 +27,7 @@ public class ProcessMutationRequestService {
         MutationJournal destinationMutationJournal = mutationJournalRepository.findById(journalId)
                 .orElseThrow(() -> new EntityNotFoundException("Stock journal not found"));
 
-        AuthorizationUtil.validateOriginAuthorization(destinationMutationJournal);
+//        AuthorizationUtil.validateOriginAuthorization(destinationMutationJournal);
 
         if (!destinationMutationJournal.getOriginWarehouse().getId().equals(warehouseId)) {
             throw new AccessDeniedException("Access denied: The provided warehouse does not match the origin warehouse in this mutation request.");

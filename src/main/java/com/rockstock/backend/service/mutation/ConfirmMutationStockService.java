@@ -34,7 +34,7 @@ public class ConfirmMutationStockService {
         MutationJournal originMutationJournal = mutationJournalRepository.findOriginJournalByDestinationId(journalId)
                 .orElseThrow(() -> new RuntimeException("Related origin journal not found"));
 
-        AuthorizationUtil.validateDestinationAuthorization(warehouseId);
+//        AuthorizationUtil.validateDestinationAuthorization(warehouseId);
 
         if (!Objects.equals(destinationMutationJournal.getDestinationWarehouse().getId(), warehouseId)) {
             throw new RuntimeException("The warehouse is not the same");
