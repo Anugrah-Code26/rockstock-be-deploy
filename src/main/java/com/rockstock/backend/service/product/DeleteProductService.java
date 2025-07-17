@@ -6,11 +6,13 @@ import com.rockstock.backend.entity.product.ProductStatus;
 import com.rockstock.backend.entity.stock.WarehouseStock;
 import com.rockstock.backend.infrastructure.product.repository.ProductRepository;
 import com.rockstock.backend.infrastructure.productPicture.repository.ProductPictureRepository;
+import com.rockstock.backend.infrastructure.user.auth.security.Claims;
 import com.rockstock.backend.infrastructure.warehouseStock.repository.WarehouseStockRepository;
 import com.rockstock.backend.service.cloudinary.DeleteCloudinaryService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -27,6 +29,10 @@ public class DeleteProductService {
 
     @Transactional
     public void softDeleteProduct(Long id) {
+//        String role = Claims.getRoleFromJwt();
+//        if (!"Super Admin".equalsIgnoreCase(role)) {
+//            throw new AuthorizationDeniedException("Access denied: Only Super Admin can perform this action.");
+//        }
         Product product = productRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 

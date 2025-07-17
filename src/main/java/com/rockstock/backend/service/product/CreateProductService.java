@@ -6,8 +6,10 @@ import com.rockstock.backend.entity.product.ProductStatus;
 import com.rockstock.backend.infrastructure.product.dto.CreateProductResponseDTO;
 import com.rockstock.backend.infrastructure.product.repository.ProductRepository;
 import com.rockstock.backend.infrastructure.productCategory.repository.ProductCategoryRepository;
+import com.rockstock.backend.infrastructure.user.auth.security.Claims;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -22,6 +24,10 @@ public class CreateProductService {
 
     @Transactional
     public CreateProductResponseDTO createDraftProduct() {
+//        String role = Claims.getRoleFromJwt();
+//        if (!"Super Admin".equalsIgnoreCase(role)) {
+//            throw new AuthorizationDeniedException("Access denied: Only Super Admin can perform this action.");
+//        }
         Product product = new Product();
         product.setProductName("Draft Product");
         product.setDetail("This is a draft product.");

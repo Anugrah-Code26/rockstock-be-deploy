@@ -1,8 +1,6 @@
 package com.rockstock.backend.infrastructure.warehouse.controller;
 
 import com.rockstock.backend.common.response.ApiResponse;
-import com.rockstock.backend.infrastructure.warehouse.dto.AssignWarehouseAdminDTO;
-import com.rockstock.backend.infrastructure.warehouse.dto.UpdateWarehouseRequestDTO;
 import com.rockstock.backend.infrastructure.warehouse.dto.WarehouseRequestDTO;
 import com.rockstock.backend.infrastructure.warehouse.dto.WarehouseResponseDTO;
 import com.rockstock.backend.service.warehouse.FindNearestWarehouseService;
@@ -39,6 +37,11 @@ public class WarehouseController {
     @GetMapping("/warehouse-admin")
     public ResponseEntity<List<WarehouseResponseDTO>> getWarehousesByWarehouseAdmin() {
         return ResponseEntity.ok(warehouseService.getWarehousesByWarehouseAdmin());
+    }
+
+    @GetMapping("/warehouse-role")
+    public ResponseEntity<List<WarehouseResponseDTO>> getWarehousesByRoles() {
+        return ResponseEntity.ok(warehouseService.getWarehousesByRoles());
     }
 
     @GetMapping("/nearest")

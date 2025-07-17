@@ -32,13 +32,11 @@ public class GetMutationJournalService {
             String sortDirection, Pageable pageable) {
 
 //        String currentUserRole = Claims.getRoleFromJwt();
-//        // Allow only Super Admin and Warehouse Admin.
 //        if (!"Super Admin".equalsIgnoreCase(currentUserRole) &&
 //                !"Warehouse Admin".equalsIgnoreCase(currentUserRole)) {
 //            throw new AccessDeniedException("Access Denied: Only Super Admin or Warehouse Admin can access this data.");
 //        }
 //
-//        // If the user is a Warehouse Admin, ensure they only see their allowed warehouse.
 //        if ("Warehouse Admin".equalsIgnoreCase(currentUserRole)) {
 //            List<Long> allowedWarehouseIds = Claims.getWarehouseIdsFromJwt();
 //            if (warehouseId == null || !allowedWarehouseIds.contains(warehouseId)) {

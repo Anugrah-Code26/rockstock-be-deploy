@@ -32,7 +32,7 @@ public class AdjustStockService {
             throw new IllegalArgumentException("New stock quantity must not be null");
         }
 
-        AuthorizationUtil.validateDestinationAuthorization(warehouseId);
+//        AuthorizationUtil.validateDestinationAuthorization(warehouseId);
 
         Warehouse warehouse = warehouseRepository.findByIdAndDeletedAtIsNull(warehouseId)
                 .orElseThrow(() -> new RuntimeException("Warehouse not found"));

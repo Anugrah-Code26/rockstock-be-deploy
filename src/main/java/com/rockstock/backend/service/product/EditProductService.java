@@ -7,10 +7,12 @@ import com.rockstock.backend.infrastructure.product.dto.EditProductRequestDTO;
 import com.rockstock.backend.infrastructure.product.dto.EditProductResponseDTO;
 import com.rockstock.backend.infrastructure.product.repository.ProductRepository;
 import com.rockstock.backend.infrastructure.productCategory.repository.ProductCategoryRepository;
+import com.rockstock.backend.infrastructure.user.auth.security.Claims;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -24,6 +26,10 @@ public class EditProductService {
     private final ProductCategoryRepository productCategoryRepository;
 
     public EditProductResponseDTO editProduct(Long id, EditProductRequestDTO editProductRequestDTO) {
+//        String role = Claims.getRoleFromJwt();
+//        if (!"Super Admin".equalsIgnoreCase(role)) {
+//            throw new AuthorizationDeniedException("Access denied: Only Super Admin can perform this action.");
+//        }
         Product product = productRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
 

@@ -96,11 +96,10 @@ public class SecurityConfig {
                         .requestMatchers("/static/**").permitAll()
                         .requestMatchers("/api/v1/addresses/**").permitAll()
                         .requestMatchers("/api/v1/products/**").permitAll()
-                        .requestMatchers("/api/v1/stocks/**").permitAll()
-                        .requestMatchers("/api/v1/pictures/**").permitAll()
                         .requestMatchers("/api/v1/categories/**").permitAll()
+                        .requestMatchers("/api/v1/stocks/**").permitAll()
                         .requestMatchers("/api/v1/mutations/**").permitAll()
-                        // Allow static files
+                        .requestMatchers("/api/v1/pictures/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(oauth2 -> {

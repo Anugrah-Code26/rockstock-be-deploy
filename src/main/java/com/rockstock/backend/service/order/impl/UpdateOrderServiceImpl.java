@@ -99,9 +99,9 @@ public class UpdateOrderServiceImpl implements UpdateOrderService {
             case PROCESSING -> {
                 if (userRole.equals("Super Admin") && newStatus == OrderStatusList.CANCELED) {
                     foundOrder.setStatus(newStatus);
-                    releaseStockService.releaseLockedStockForOrder(orderId);
+//                    releaseStockService.releaseLockedStockForOrder(orderId);
                 } else if (userRole.equals("Super Admin") && newStatus == OrderStatusList.ON_DELIVERY) {
-                    destinationShipmentService.shipOrder(foundOrder);
+//                    destinationShipmentService.shipOrder(foundOrder);
                     foundOrder.setStatus(newStatus);
                 } else {
                     throw new IllegalStateException("Only Super Admin can move order to ON_DELIVERY or CANCELED");

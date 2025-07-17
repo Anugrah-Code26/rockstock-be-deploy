@@ -5,6 +5,7 @@ import com.rockstock.backend.entity.stock.MutationJournal;
 import com.rockstock.backend.entity.stock.MutationStatus;
 import com.rockstock.backend.infrastructure.mutationJournal.dto.CancelRequestDTO;
 import com.rockstock.backend.infrastructure.mutationJournal.repository.MutationJournalRepository;
+import com.rockstock.backend.infrastructure.util.security.AuthorizationUtil;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
